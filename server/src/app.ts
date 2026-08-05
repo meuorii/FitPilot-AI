@@ -6,49 +6,36 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { env } from './config/env.js';
 
+import authRoutes from './routes/auth.routes.js';
+import profileRoutes from './routes/profile.routes.js';
+import goalsRoutes from './routes/goals.routes.js';
+
 const app: Application = express();
 
-// 1. HTTP Request Logging (Logs incoming requests to console)
 app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'));
-
-// 2. Security & Core Middlewares
 app.use(helmet());
-app.use(
-  cors({
-    origin: env.CLIENT_ORIGIN,
-    credentials: true,
-  })
-);
+app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// 3. Global Rate Limiting (Prevents API abuse)
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100, 
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' },
-});
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, message: { success: false, error: 'Too Many Requests', message: 'Too many requests from this IP. Please try again after 15 minutes.' } });
 app.use('/api', apiLimiter);
 
-// 4. Health Check Endpoint
 app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'online',
-    system: 'FitPilot AI Node.js Engine',
-    aiServiceEndpoint: env.HF_AI_SERVICE_URL,
-    timestamp: new Date().toISOString(),
-  });
+  res.status(200).json({ status: 'online', system: 'FitPilot AI Node.js Engine', aiServiceEndpoint: env.HF_AI_SERVICE_URL, timestamp: new Date().toISOString() });
 });
 
-// 5. Global Error Handling Middleware
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/profile', profileRoutes);
+app.use('/api/v1/goals', goalsRoutes);
+
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: 'Not Found', message: `Cannot ${req.method} ${req.originalUrl}` });
+});
+
 app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error(`🔥 [Unhandled Error] ${req.method} ${req.url}:`, err.stack || err.message);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: env.NODE_ENV === 'development' ? err.message : undefined,
-  });
+  res.status(500).json({ success: false, error: 'Internal Server Error', message: env.NODE_ENV === 'development' ? err.message : 'Something went wrong on the server' });
 });
 
 export default app;
