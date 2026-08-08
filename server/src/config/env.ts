@@ -12,7 +12,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Supabase Service Role Key is required'),
   HF_AI_SERVICE_URL: z.string().url('Invalid AI Service URL').default('http://localhost:8000'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
-  INTERNAL_API_KEY: z.string().default('fitpilot_internal_secret_key_2026'),
+  INTERNAL_API_KEY: z.string().default('fitpilot-secret-internal-key-2026'),
 });
 
 export const env = envSchema.parse(process.env);
