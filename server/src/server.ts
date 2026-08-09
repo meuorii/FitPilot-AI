@@ -5,48 +5,24 @@ const PORT = parseInt(env.PORT, 10);
 
 const server = app.listen(PORT, async () => {
   const timestamp = new Date().toISOString();
-  
-  // Clean, structured boot header
-  console.log(`\n--------------------------------------------------`);
-  console.log(`🚀 FitPilot AI Backend | ${env.NODE_ENV.toUpperCase()} MODE`);
-  console.log(`--------------------------------------------------`);
-  console.log(`• Server URL : http://localhost:${PORT}`);
-  console.log(`• Health Check: http://localhost:${PORT}/health`);
-  console.log(`• Timestamp   : ${timestamp}`);
-
-  // Async connectivity check for the AI Service
+  const aiBaseUrl = env.HF_AI_SERVICE_URL.replace(/\/+$/, '');
+  console.log(`\n--------------------------------------------------\n🚀 FitPilot AI Backend | ${env.NODE_ENV.toUpperCase()} MODE\n--------------------------------------------------`);
+  console.log(`• Server URL   : http://localhost:${PORT}\n• Health Check : http://localhost:${PORT}/health\n• Timestamp    : ${timestamp}`);
   try {
-    const aiResponse = await fetch(`${env.HF_AI_SERVICE_URL}/health`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
-    if (aiResponse?.ok) {
-      console.log(`• AI Microservice: ONLINE [${env.HF_AI_SERVICE_URL}]`);
-    } else {
-      console.log(`• AI Microservice: OFFLINE [${env.HF_AI_SERVICE_URL}]`);
-    }
-  } catch (_err) {
-    console.log(`• AI Microservice: UNREACHABLE [${env.HF_AI_SERVICE_URL}]`);
+    const aiResponse = await fetch(`${aiBaseUrl}/health`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+    console.log(`• AI Service   : ${aiResponse?.ok ? 'ONLINE' : 'OFFLINE'} [${aiBaseUrl}]`);
+  } catch {
+    console.log(`• AI Service   : UNREACHABLE [${aiBaseUrl}]`);
   }
-  
   console.log(`--------------------------------------------------\n`);
 });
 
-// Graceful Shutdown Logging
 const handleShutdown = (signal: string) => {
   console.log(`\n[SYSTEM] Received ${signal}. Closing server...`);
-  server.close(() => {
-    console.log('[SYSTEM] Express server shut down cleanly.');
-    process.exit(0);
-  });
+  server.close(() => { console.log('[SYSTEM] Express server shut down cleanly.'); process.exit(0); });
 };
 
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
-
-// Unhandled Exception Catchers
-process.on('unhandledRejection', (reason: unknown) => {
-  console.error('[FATAL] Unhandled Promise Rejection:', reason);
-});
-
-process.on('uncaughtException', (error: Error) => {
-  console.error('[FATAL] Uncaught Exception:', error.message);
-  process.exit(1);
-});
+process.on('unhandledRejection', (reason: unknown) => console.error('[FATAL] Unhandled Promise Rejection:', reason));
+process.on('uncaughtException', (error: Error) => { console.error('[FATAL] Uncaught Exception:', error.message); process.exit(1); });
