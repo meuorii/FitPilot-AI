@@ -9,6 +9,7 @@ import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import mealRoutes from './routes/meal.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/meals', mealRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Not Found', message: `Cannot ${req.method} ${req.originalUrl}` });
