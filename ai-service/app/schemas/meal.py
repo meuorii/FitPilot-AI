@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List
 
 class MealItem(BaseModel):
@@ -10,6 +10,13 @@ class MealItem(BaseModel):
     carbs: float = Field(description="Carbohydrates in grams")
     fat: float = Field(description="Fat in grams")
 
+    @field_validator("calories", mode="before")
+    @classmethod
+    def round_calories(cls, v):
+        if isinstance(v, (float, int)):
+            return round(v)
+        return v
+
 class MealParseRequest(BaseModel):
     text: str = Field(..., example="I ate 180g rice, chicken adobo, and one boiled egg")
 
@@ -19,3 +26,10 @@ class MealParseResponse(BaseModel):
     protein: float
     carbs: float
     fat: float
+
+    @field_validator("totalCalories", mode="before")
+    @classmethod
+    def round_total_calories(cls, v):
+        if isinstance(v, (float, int)):
+            return round(v)
+        return v

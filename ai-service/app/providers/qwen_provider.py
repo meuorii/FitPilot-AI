@@ -1,4 +1,5 @@
 import json
+import re
 from openai import OpenAI
 from app.core.config import settings
 
@@ -20,13 +21,13 @@ class QwenProvider:
             temperature=0.1, 
             top_p=settings.TOP_P,
             max_tokens=settings.MAX_TOKENS,
-            response_format={"type": "json_object"},
-            extra_body={
-                "top_k": settings.TOP_K,
-                "min_p": settings.MIN_P
-            }
+            response_format={"type": "json_object"}
         )
         raw_content = response.choices[0].message.content.strip()
+        if raw_content.startswith("```"):
+            raw_content = re.sub(r"^```(?:json)?\n?", "", raw_content)
+            raw_content = re.sub(r"\n?```$", "", raw_content).strip()
+
         return json.loads(raw_content)
 
     def chat_completion(self, system_prompt: str, messages: list) -> str:
@@ -37,11 +38,7 @@ class QwenProvider:
             messages=formatted_messages,
             temperature=settings.TEMPERATURE,
             top_p=settings.TOP_P,
-            max_tokens=settings.MAX_TOKENS,
-            extra_body={
-                "top_k": settings.TOP_K,
-                "min_p": settings.MIN_P
-            }
+            max_tokens=settings.MAX_TOKENS
         )
         return response.choices[0].message.content.strip()
 

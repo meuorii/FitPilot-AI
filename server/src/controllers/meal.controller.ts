@@ -17,9 +17,13 @@ export const logMeal = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
     if (!userId) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'User ID missing' }); return; }
-    const { meal_type = 'snack', raw_text, foods, total_calories, protein_grams, carbs_grams, fat_grams } = req.body;
+    const { meal_type = 'snack', raw_text, foods, total_calories, totalCalories, protein_grams, protein, carbs_grams, carbs, fat_grams, fat } = req.body;
     if (!foods || !Array.isArray(foods) || foods.length === 0) { res.status(400).json({ success: false, error: 'Bad Request', message: 'At least one food item is required to log a meal.' }); return; }
-    const { data: newMealLog, error } = await supabaseAdmin.from('meal_logs').insert([{ user_id: userId, meal_type, raw_text: raw_text || '', foods, total_calories: Number(total_calories) || 0, protein_grams: Number(protein_grams) || 0, carbs_grams: Number(carbs_grams) || 0, fat_grams: Number(fat_grams) || 0, logged_at: new Date().toISOString() }]).select('*').single();
+    const finalCalories = Number(total_calories ?? totalCalories) || 0;
+    const finalProtein = Number(protein_grams ?? protein) || 0;
+    const finalCarbs = Number(carbs_grams ?? carbs) || 0;
+    const finalFat = Number(fat_grams ?? fat) || 0;
+    const { data: newMealLog, error } = await supabaseAdmin.from('meal_logs').insert([{ user_id: userId, meal_type, raw_text: raw_text || '', foods, total_calories: finalCalories, protein_grams: finalProtein, carbs_grams: finalCarbs, fat_grams: finalFat, logged_at: new Date().toISOString() }]).select('*').single();
     if (error) { res.status(400).json({ success: false, error: 'Bad Request', message: error.message }); return; }
     res.status(201).json({ success: true, message: 'Meal logged successfully!', data: newMealLog });
   } catch (err) {
