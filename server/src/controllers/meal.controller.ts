@@ -45,7 +45,7 @@ export const getTodayMeals = async (req: Request, res: Response): Promise<void> 
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString();
     const { data: todayMeals, error } = await supabaseAdmin.from('meal_logs').select('*').eq('user_id', userId).gte('logged_at', startOfDay).lte('logged_at', endOfDay).order('logged_at', { ascending: false });
     if (error) throw error;
-    const totals = (todayMeals || []).reduce((acc, meal) => { acc.calories += Number(meal.total_calories || 0); acc.protein += Number(meal.protein_grams || 0); acc.carbs += Number(meal.carbs_grams || 0); acc.fat += Number(meal.fat_grams || 0); return acc; }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    const totals = (todayMeals || []).reduce((acc, meal) => { acc.calories += Number(meal.total_calories || 0); acc.protein += Number(meal.total_protein || 0); acc.carbs += Number(meal.total_carbs || 0); acc.fat += Number(meal.total_fat || 0); return acc; }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
     res.status(200).json({ success: true, data: { meals: todayMeals || [], today_summary: { total_calories: totals.calories, total_protein: Number(totals.protein.toFixed(1)), total_carbs: Number(totals.carbs.toFixed(1)), total_fat: Number(totals.fat.toFixed(1)) } } });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Internal Server Error', message: err instanceof Error ? err.message : 'Failed to fetch today meals' });
