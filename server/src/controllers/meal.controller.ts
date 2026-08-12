@@ -17,16 +17,21 @@ export const logMeal = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
     if (!userId) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'User ID missing' }); return; }
-    const { meal_type = 'snack', raw_text, foods, total_calories, totalCalories, protein_grams, protein, carbs_grams, carbs, fat_grams, fat } = req.body;
-    if (!foods || !Array.isArray(foods) || foods.length === 0) { res.status(400).json({ success: false, error: 'Bad Request', message: 'At least one food item is required to log a meal.' }); return; }
-    const finalCalories = Number(total_calories ?? totalCalories) || 0;
-    const finalProtein = Number(protein_grams ?? protein) || 0;
-    const finalCarbs = Number(carbs_grams ?? carbs) || 0;
-    const finalFat = Number(fat_grams ?? fat) || 0;
-    const { data: newMealLog, error } = await supabaseAdmin.from('meal_logs').insert([{ user_id: userId, meal_type, raw_text: raw_text || '', foods, total_calories: finalCalories, protein_grams: finalProtein, carbs_grams: finalCarbs, fat_grams: finalFat, logged_at: new Date().toISOString() }]).select('*').single();
-    if (error) { res.status(400).json({ success: false, error: 'Bad Request', message: error.message }); return; }
+    const payload = req.body?.data || req.body || {};
+    const { foods, totalCalories, total_calories, protein, total_protein, carbs, total_carbs, fat, total_fat } = payload;
+    const meal_type = req.body?.meal_type || payload.meal_type || 'snack';
+    const raw_input_prompt = req.body?.raw_input_prompt || req.body?.raw_text || payload.raw_input_prompt || payload.raw_text || '';
+    const food_items = foods || payload.food_items || payload.foods;
+    if (!food_items || !Array.isArray(food_items) || food_items.length === 0) { res.status(400).json({ success: false, error: 'Bad Request', message: 'At least one food item is required to log a meal.' }); return; }
+    const finalCalories = Math.round(Number(total_calories ?? totalCalories) || 0);
+    const finalProtein = Number(total_protein ?? protein) || 0;
+    const finalCarbs = Number(total_carbs ?? carbs) || 0;
+    const finalFat = Number(total_fat ?? fat) || 0;
+    const { data: newMealLog, error } = await supabaseAdmin.from('meal_logs').insert([{ user_id: userId, meal_type, raw_input_prompt, food_items, total_calories: finalCalories, total_protein: finalProtein, total_carbs: finalCarbs, total_fat: finalFat, logged_at: new Date().toISOString() }]).select('*').single();
+    if (error) { console.error('Supabase Meal Log Error:', error); res.status(400).json({ success: false, error: 'Bad Request', message: error.message }); return; }
     res.status(201).json({ success: true, message: 'Meal logged successfully!', data: newMealLog });
   } catch (err) {
+    console.error('Log Meal Internal Error:', err);
     res.status(500).json({ success: false, error: 'Internal Server Error', message: err instanceof Error ? err.message : 'Failed to log meal' });
   }
 };
