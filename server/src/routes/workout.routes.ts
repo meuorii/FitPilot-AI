@@ -7,7 +7,14 @@ const router = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith('image/'))
+  fileFilter: (_req, file, cb) => {
+    const isImage = file.mimetype.startsWith('image/') || file.mimetype === 'application/octet-stream';
+    if (isImage) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!')); 
+    }
+  }
 });
 
 router.use(authenticateUser);

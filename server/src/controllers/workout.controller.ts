@@ -32,17 +32,37 @@ export const getExercises = async (_req: Request, res: Response): Promise<void> 
   }
 };
 
-// POST /workouts/exercises - Create a new global exercise
 export const createExercise = async (req: Request, res: Response): Promise<void> => {
+  console.log('REQ FILE:', req.file); // If undefined, Multer didn't parse a file
+  console.log('REQ BODY:', req.body);
   try {
     const userId = getUserId(req);
     if (!userId) { res.status(401).json({ success: false, message: 'Unauthorized: User ID missing' }); return; }
-    const { name, category, equipment, difficulty, instructions, image_url } = req.body;
-    if (!name || !category || !equipment) { res.status(400).json({ success: false, message: 'Name, category, and equipment are required.' }); return; }
-    const cleanName = String(name).trim();
-    if (!cleanName) { res.status(400).json({ success: false, message: 'Exercise name cannot be empty.' }); return; }
-    const { data, error } = await supabaseAdmin.from('exercises').insert({ name: cleanName, category, equipment, difficulty: difficulty || 'beginner', instructions: Array.isArray(instructions) ? instructions : [], image_url: image_url || null }).select().single();
+    const { name, category, equipment, difficulty, instructions } = req.body;
+    const cleanName = String(name || '').trim();
+    if (!cleanName || !category || !equipment) { res.status(400).json({ success: false, message: 'Name, category, and equipment are required.' }); return; }
+    let parsedInstructions: string[] = [];
+    if (instructions) {
+      try {
+        parsedInstructions = typeof instructions === 'string' ? JSON.parse(instructions) : instructions;
+        if (!Array.isArray(parsedInstructions) || !parsedInstructions.every((i) => typeof i === 'string')) {
+          res.status(400).json({ success: false, message: 'Instructions must be an array of strings.' }); return;
+        }
+      } catch {
+        res.status(400).json({ success: false, message: 'Instructions must be a valid JSON array.' }); return;
+      }
+    }
+    let imageUrl: string | null = null, filePath: string | null = null;
+    if (req.file) {
+      const ext = req.file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+      filePath = `exercises/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabaseAdmin.storage.from('exercise-images').upload(filePath, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
+      if (uploadError) throw uploadError;
+      imageUrl = supabaseAdmin.storage.from('exercise-images').getPublicUrl(filePath).data.publicUrl;
+    }
+    const { data, error } = await supabaseAdmin.from('exercises').insert({ name: cleanName, category, equipment, difficulty: difficulty || 'beginner', instructions: parsedInstructions, image_url: imageUrl }).select().single();
     if (error) {
+      if (filePath) await supabaseAdmin.storage.from('exercise-images').remove([filePath]);
       if (error.code === '23505') { res.status(409).json({ success: false, message: 'An exercise with this name already exists.' }); return; }
       throw error;
     }
