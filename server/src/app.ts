@@ -11,6 +11,7 @@ import profileRoutes from './routes/profile.routes.js';
 import mealRoutes from './routes/meal.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import workoutRoutes from './routes/workout.routes.js';
+import coachRoutes from './routes/coach.routes.js';
 
 const app: Application = express();
 
@@ -32,6 +33,7 @@ app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/meals', mealRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/workouts', workoutRoutes);
+app.use('/api/v1/coach', coachRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Not Found', message: `Cannot ${req.method} ${req.originalUrl}` });
