@@ -30,7 +30,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
   try {
     const userId = req.user?.id;
     if (!userId) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'User ID missing from request' }); return; }
-    const allowedFields = ['full_name', 'avatar_url', 'age', 'gender', 'height_cm', 'current_weight_kg', 'activity_level', 'primary_goal', 'fitness_experience', 'unit_system', 'theme', 'auto_recalculate_goals'];
+    const allowedFields = ['full_name', 'avatar_url', 'age', 'gender', 'height_cm', 'current_weight_kg', 'target_weight_kg', 'activity_level', 'primary_goal', 'fitness_experience', 'unit_system', 'theme', 'is_onboarded', 'auto_recalculate_goals'];
     const updates = Object.fromEntries(Object.entries(req.body).filter(([k, v]) => allowedFields.includes(k) && v !== undefined));
     const { data: currentProfile } = await supabaseAdmin.from('profiles').select('age, gender, height_cm, current_weight_kg, activity_level, primary_goal').eq('id', userId).single();
     if (currentProfile) {
