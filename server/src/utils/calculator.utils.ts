@@ -1,11 +1,16 @@
 export interface UserMetrics { age: number; gender: 'male' | 'female' | 'other'; height_cm: number; weight_kg: number; activity_level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active'; primary_goal: 'lose_weight' | 'lose_fat' | 'maintain' | 'gain_muscle'; }
 export interface ComputedHealthProfile { bmi: number; bmi_category: string; bmr: number; tdee: number; daily_calories: number; protein_grams: number; carbs_grams: number; fat_grams: number; water_ml_goal: number; }
-export interface GoalCalculationOption { goal: UserMetrics['primary_goal']; label: string; is_recommended: boolean; recommendation_reason?: string; metrics: ComputedHealthProfile; }
+export interface GoalCalculationOption { goal: UserMetrics['primary_goal']; label: string; is_recommended: boolean; recommendation_reason?: string; recommended_target_weight_kg: number; metrics: ComputedHealthProfile; }
 
 export const calculateBMI = (weightKg: number, heightCm: number): { bmi: number; category: string } => {
   if (!heightCm || heightCm <= 0 || !weightKg || weightKg <= 0) return { bmi: 0, category: 'Unknown' };
   const bmi = Number((weightKg / Math.pow(heightCm / 100, 2)).toFixed(1));
   return { bmi, category: bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese' };
+};
+
+export const calculateRecommendedTargetWeight = (currentWeightKg: number, goal: UserMetrics['primary_goal']): number => {
+  const targetMultipliers: Record<UserMetrics['primary_goal'], number> = { lose_fat: 0.95, lose_weight: 0.92, gain_muscle: 1.04, maintain: 1.0 };
+  return Number((currentWeightKg * (targetMultipliers[goal] ?? 1.0)).toFixed(1));
 };
 
 export const calculateHealthProfile = (metrics: UserMetrics): ComputedHealthProfile => {
@@ -35,5 +40,5 @@ export const calculateAllGoalOptions = (input: Omit<UserMetrics, 'primary_goal'>
     gain_muscle: bmi < 18.5 ? 'Recommended because your BMI is underweight. This will help you reach a healthier weight.' : 'Recommended for building muscle mass and gaining weight.'
   };
   const goals: { goal: UserMetrics['primary_goal']; label: string }[] = [{ goal: 'lose_weight', label: 'Lose Weight' }, { goal: 'lose_fat', label: 'Lose Body Fat' }, { goal: 'maintain', label: 'Maintain Weight' }, { goal: 'gain_muscle', label: 'Gain Muscle' }];
-  return goals.map((item) => ({ goal: item.goal, label: item.label, is_recommended: item.goal === recGoal, recommendation_reason: reasons[item.goal], metrics: calculateHealthProfile({ ...input, primary_goal: item.goal }) }));
+  return goals.map((item) => ({ goal: item.goal, label: item.label, is_recommended: item.goal === recGoal, recommendation_reason: reasons[item.goal], recommended_target_weight_kg: calculateRecommendedTargetWeight(input.weight_kg, item.goal), metrics: calculateHealthProfile({ ...input, primary_goal: item.goal }) }));
 };
