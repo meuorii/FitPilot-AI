@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { authenticateUser } from '../middleware/auth.middleware.js';
-import { getMyProfile, updateMyProfile } from '../controllers/profile.controller.js';
+import { getMyProfile, updateMyProfile, calculateGoalOptions } from '../controllers/profile.controller.js';
 
 const router = Router();
 router.use(authenticateUser);
-router.get('/me', getMyProfile);
-router.patch('/me', updateMyProfile);
-
+router.route('/me').get(getMyProfile).patch(updateMyProfile);
+router.post('/calculate-goals', calculateGoalOptions);
 export default router;
