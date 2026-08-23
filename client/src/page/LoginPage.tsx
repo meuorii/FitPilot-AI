@@ -1,10 +1,41 @@
+import { useState } from 'react';
 import LoginForm, { type LoginCredentials } from '../components/Login/LoginForm';
+import { loginUser } from '../services/api/auth';
+
+const AUTH_TOKEN_KEY = 'fitpilot_token';
+const AUTH_USER_KEY = 'fitpilot_user';
 
 const ROCCO_ARTWORK = 'https://www.figma.com/api/mcp/asset/213433f2-3d9f-4bbd-8c9f-264276cfa85f.png';
 
 export default function LoginPage() {
-  const handleLogin = (credentials: LoginCredentials) => {
-    console.info('Login submitted', { email: credentials.email, rememberMe: credentials.rememberMe });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginSuccess, setLoginSuccess] = useState<string | null>(null);
+
+  const handleLogin = async ({ email, password, rememberMe }: LoginCredentials) => {
+    setIsLoggingIn(true);
+    setLoginError(null);
+    setLoginSuccess(null);
+
+    try {
+      const response = await loginUser({ email: email.trim(), password });
+      const storage = rememberMe ? window.localStorage : window.sessionStorage;
+      const previousStorage = rememberMe ? window.sessionStorage : window.localStorage;
+
+      previousStorage.removeItem(AUTH_TOKEN_KEY);
+      previousStorage.removeItem(AUTH_USER_KEY);
+      storage.setItem(AUTH_TOKEN_KEY, response.data.token);
+      storage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user));
+
+      setLoginSuccess(response.message || 'Login successful. Welcome back!');
+
+      // Add your router navigation here, for example:
+      // navigate(response.data.user.is_onboarded ? '/dashboard' : '/onboarding');
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Unable to log in. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -20,7 +51,12 @@ export default function LoginPage() {
         </figure>
 
         <section className="flex w-full flex-1 items-center justify-center lg:h-full lg:min-h-0">
-          <LoginForm onSubmit={handleLogin} />
+          <LoginForm
+            onSubmit={handleLogin}
+            isLoading={isLoggingIn}
+            errorMessage={loginError}
+            successMessage={loginSuccess}
+          />
         </section>
       </div>
     </main>

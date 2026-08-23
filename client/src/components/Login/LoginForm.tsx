@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import type { LoginRequest } from '../../services/types/auth'
 
 const ICONS = {
   mail: 'https://www.figma.com/api/mcp/asset/49cce67a-4717-4dd0-9b88-21f2862d4212.png',
@@ -8,25 +9,33 @@ const ICONS = {
   hidePassword: 'https://www.figma.com/api/mcp/asset/5085f228-0036-4da5-8319-c0747cf1e14d.png',
 }
 
-export interface LoginCredentials {
-  email: string
-  password: string
+export interface LoginCredentials extends LoginRequest {
   rememberMe: boolean
 }
 
 interface LoginFormProps {
-  onSubmit?: (credentials: LoginCredentials) => void
+  onSubmit?: (credentials: LoginCredentials) => void | Promise<void>
   onForgotPassword?: () => void
   onSignUp?: () => void
+  isLoading?: boolean
+  errorMessage?: string | null
+  successMessage?: string | null
 }
 
-export default function LoginForm({ onSubmit, onForgotPassword, onSignUp }: LoginFormProps) {
+export default function LoginForm({
+  onSubmit,
+  onForgotPassword,
+  onSignUp,
+  isLoading = false,
+  errorMessage,
+  successMessage,
+}: LoginFormProps) {
   const [formData, setFormData] = useState<LoginCredentials>({ email: '', password: '', rememberMe: true })
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit?.(formData)
+    await onSubmit?.(formData)
   }
 
   return (
@@ -70,7 +79,25 @@ export default function LoginForm({ onSubmit, onForgotPassword, onSignUp }: Logi
           <button type="button" onClick={onForgotPassword} className="shrink-0 text-[11px] font-bold text-[#7482A4] underline decoration-[#7482A4]/70 hover:text-[#38323F]">Forgot Password?</button>
         </div>
 
-        <button type="submit" className="mt-[clamp(40px,8.5vh,86px)] h-[50px] w-full rounded-[10px] bg-[#7482A4] text-[17px] font-bold text-[#F5F3F6] shadow-[0_4px_6.6px_rgba(116,130,164,0.26)] transition-all hover:-translate-y-0.5 hover:bg-[#697897] active:translate-y-0">Login</button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="mt-[clamp(40px,8.5vh,86px)] h-[50px] w-full rounded-[10px] bg-[#7482A4] text-[17px] font-bold text-[#F5F3F6] shadow-[0_4px_6.6px_rgba(116,130,164,0.26)] transition-all hover:-translate-y-0.5 hover:bg-[#697897] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+
+        {(errorMessage || successMessage) && (
+          <p
+            role={errorMessage ? 'alert' : 'status'}
+            aria-live="polite"
+            className={`mt-3 rounded-lg px-3 py-2 text-center text-sm ${
+              errorMessage ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
+            }`}
+          >
+            {errorMessage ?? successMessage}
+          </p>
+        )}
 
         <p className="mt-[25px] text-center text-sm text-[#38323F]">
           Don&apos;t have an account?{' '}
