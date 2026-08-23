@@ -9,6 +9,8 @@ export const loginUser = async (credentials: LoginRequest): Promise<LoginRespons
     body: JSON.stringify(credentials),
   });
 
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  return response.json();
+  const result = (await response.json().catch(() => null)) as LoginResponse | null;
+  if (!response.ok || !result?.success) throw new Error(result?.message || `Login failed with status ${response.status}.`);
+
+  return result;
 };
