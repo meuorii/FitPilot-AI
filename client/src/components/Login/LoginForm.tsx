@@ -18,8 +18,6 @@ interface LoginFormProps {
   onForgotPassword?: () => void
   onSignUp?: () => void
   isLoading?: boolean
-  errorMessage?: string | null
-  successMessage?: string | null
 }
 
 export default function LoginForm({
@@ -27,8 +25,6 @@ export default function LoginForm({
   onForgotPassword,
   onSignUp,
   isLoading = false,
-  errorMessage,
-  successMessage,
 }: LoginFormProps) {
   const [formData, setFormData] = useState<LoginCredentials>({ email: '', password: '', rememberMe: true })
   const [showPassword, setShowPassword] = useState(false)
@@ -86,18 +82,6 @@ export default function LoginForm({
         >
           {isLoading ? 'Logging in...' : 'Login'}
         </button>
-
-        {(errorMessage || successMessage) && (
-          <p
-            role={errorMessage ? 'alert' : 'status'}
-            aria-live="polite"
-            className={`mt-3 rounded-lg px-3 py-2 text-center text-sm ${
-              errorMessage ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
-            }`}
-          >
-            {errorMessage ?? successMessage}
-          </p>
-        )}
 
         <p className="mt-[25px] text-center text-sm text-[#38323F]">
           Don&apos;t have an account?{' '}
