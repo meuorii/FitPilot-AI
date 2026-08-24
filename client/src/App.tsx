@@ -1,10 +1,18 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+
 import LoginPage from './page/LoginPage'
+import RegisterPage from './page/RegisterPage'
 
 const App = () => {
   return (
-    <div className="App">
-      <LoginPage />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

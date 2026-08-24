@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import LoginForm, { type LoginCredentials } from '../components/Login/LoginForm';
+import LoginForm, { type LoginCredentials } from '../components/Auth/LoginForm';
 import Toast, { type ToastType } from '../components/Toast';
 import { loginUser } from '../services/api/auth';
 
