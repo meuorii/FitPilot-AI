@@ -1,27 +1,22 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import LoginForm, { type LoginCredentials } from '../components/Auth/LoginForm'
-import Toast, { type ToastType } from '../components/Toast'
 import { loginUser } from '../services/api/auth'
+import { useToastStore } from '../stores/toastStore'
 
 const AUTH_TOKEN_KEY = 'fitpilot_token'
 const AUTH_USER_KEY = 'fitpilot_user'
 const LOGIN_ARTWORK = '/Auth/Login/image.png'
 
-interface LoginToast {
-  type: ToastType
-  heading: string
-  subheading: string
-}
-
 export default function LoginPage() {
   const navigate = useNavigate()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
-  const [toast, setToast] = useState<LoginToast | null>(null)
+  const showToast = useToastStore((state) => state.showToast)
+  const hideToast = useToastStore((state) => state.hideToast)
 
   const handleLogin = async ({ email, password, rememberMe }: LoginCredentials) => {
     setIsLoggingIn(true)
-    setToast(null)
+    hideToast()
     try {
       const response = await loginUser({ email: email.trim(), password })
       const storage = rememberMe ? window.localStorage : window.sessionStorage
@@ -30,14 +25,14 @@ export default function LoginPage() {
       previousStorage.removeItem(AUTH_USER_KEY)
       storage.setItem(AUTH_TOKEN_KEY, response.data.token)
       storage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user))
-      setToast({
+      showToast({
         type: 'success',
         heading: 'Welcome back!',
         subheading: response.message || "You're signed in and ready to continue your fitness journey.",
       })
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true })
     } catch (error) {
-      setToast({
+      showToast({
         type: 'error',
         heading: 'Login failed',
         subheading: error instanceof Error ? error.message : 'The email or password you entered is incorrect.',
@@ -79,7 +74,6 @@ export default function LoginPage() {
           </section>
         </div>
       </main>
-      {toast && <Toast key={`${toast.type}-${toast.heading}-${toast.subheading}`} type={toast.type} heading={toast.heading} subheading={toast.subheading} onClose={() => setToast(null)} />}
     </>
   )
 }

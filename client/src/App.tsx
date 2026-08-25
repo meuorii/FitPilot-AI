@@ -1,8 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import GlobalToast from './components/GlobalToast'
 import LoginPage from './page/LoginPage'
-import RegisterPage from './page/RegisterPage'
 import NotFoundPage from './page/NotFoundPage'
+import RegisterPage from './page/RegisterPage'
 
 const App = () => {
   return (
@@ -13,6 +14,8 @@ const App = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      <GlobalToast />
     </BrowserRouter>
   )
 }
