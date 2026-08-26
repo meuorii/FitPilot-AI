@@ -1,14 +1,33 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import RegisterForm, { type RegisterCredentials } from '../components/Auth/RegisterForm'
+import { registerUser } from '../services/api/auth'
+import { useToastStore } from '../stores/toastStore'
 
 const REGISTER_ARTWORK = '/Auth/Register/image.png'
+const AUTH_TOKEN_KEY = 'fitpilot_token'
+const AUTH_USER_KEY = 'fitpilot_user'
 
 export default function RegisterPage() {
-  const handleRegister = async (credentials: RegisterCredentials) => {
-    console.info('Registration submitted', { fullName: credentials.fullName, email: credentials.email })
-  }
+  const navigate = useNavigate()
+  const [isRegistering, setIsRegistering] = useState(false)
+  const showToast = useToastStore((state) => state.showToast)
+  const hideToast = useToastStore((state) => state.hideToast)
 
-  const handleLogin = () => {
-    window.location.assign('/login')
+  const handleRegister = async (credentials: RegisterCredentials) => {
+    setIsRegistering(true)
+    hideToast()
+    try {
+      const response = await registerUser({ email: credentials.email.trim(), password: credentials.password, full_name: credentials.fullName.trim() })
+      window.localStorage.setItem(AUTH_TOKEN_KEY, response.data.token)
+      window.localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user))
+      showToast({ type: 'success', heading: 'Account created!', subheading: response.message || 'Your FitPilot account is ready.' })
+      navigate('/onboarding', { replace: true })
+    } catch (error) {
+      showToast({ type: 'error', heading: 'Registration failed', subheading: error instanceof Error ? error.message : 'We could not create your account. Please try again.' })
+    } finally {
+      setIsRegistering(false)
+    }
   }
 
   return (
@@ -40,7 +59,7 @@ export default function RegisterPage() {
             <img src={REGISTER_ARTWORK} alt="Rocco getting ready for training, surrounded by healthy meals and workout equipment" draggable={false} className="register-artwork-image h-full w-full select-none object-cover object-center" />
           </figure>
           <section className="register-form-shell flex w-full flex-1 items-center justify-center lg:h-full lg:min-h-0 lg:min-w-[350px]">
-            <RegisterForm onSubmit={handleRegister} onLogin={handleLogin} />
+            <RegisterForm onSubmit={handleRegister} onLogin={() => navigate('/login')} isLoading={isRegistering} />
           </section>
         </div>
       </main>

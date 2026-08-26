@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 
+const PASSWORD_MIN_LENGTH = 8
 const ICONS = {
   fullName: '/Auth/Register/user.png',
   email: '/Auth/Register/email.png',
@@ -8,6 +9,27 @@ const ICONS = {
   viewPassword: '/Auth/Register/view.png',
   hidePassword: '/Auth/Register/close.png',
 } as const
+
+type PasswordStrength = 'weak' | 'medium' | 'strong'
+
+const STRENGTH_STYLES: Record<PasswordStrength, { label: string; widthClass: string; barClass: string; textClass: string }> = {
+  weak: { label: 'Weak', widthClass: 'w-1/3', barClass: 'bg-[#B96F78]', textClass: 'text-[#B96F78]' },
+  medium: { label: 'Medium', widthClass: 'w-2/3', barClass: 'bg-[#C6A45D]', textClass: 'text-[#C6A45D]' },
+  strong: { label: 'Strong', widthClass: 'w-full', barClass: 'bg-[#6F9B83]', textClass: 'text-[#6F9B83]' },
+}
+
+function assessPassword(password: string) {
+  const checks = [password.length >= PASSWORD_MIN_LENGTH, /[a-z]/.test(password), /[A-Z]/.test(password), /\d/.test(password), /[^A-Za-z0-9]/.test(password)]
+  const score = checks.filter(Boolean).length
+  const isValid = checks.every(Boolean)
+  let level: PasswordStrength | null = null
+  if (password) {
+    if (isValid) level = 'strong'
+    else if (checks[0] && score >= 3) level = 'medium'
+    else level = 'weak'
+  }
+  return { isValid, level }
+}
 
 export interface RegisterCredentials {
   fullName: string
@@ -55,27 +77,42 @@ export default function RegisterForm({ onSubmit, onLogin, isLoading = false }: R
   const [formData, setFormData] = useState<RegisterCredentials>({ fullName: '', email: '', password: '', confirmPassword: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [activeField, setActiveField] = useState<'password' | 'confirmPassword' | null>(null)
+  const passwordInputRef = useRef<HTMLInputElement>(null)
+  const confirmPasswordInputRef = useRef<HTMLInputElement>(null)
+
+  const passwordAssessment = assessPassword(formData.password)
+  const strengthStyle = passwordAssessment.level ? STRENGTH_STYLES[passwordAssessment.level] : null
+  const hasConfirmPassword = formData.confirmPassword.length > 0
+  const passwordsMatch = hasConfirmPassword && formData.password === formData.confirmPassword
+  const showPasswordIndicator = activeField === 'password' || formData.password.length > 0
+  const showConfirmIndicator = activeField === 'confirmPassword' || hasConfirmPassword
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const confirmPasswordInput = event.currentTarget.elements.namedItem('confirmPassword') as HTMLInputElement | null
-    if (formData.password !== formData.confirmPassword) {
-      confirmPasswordInput?.setCustomValidity('Passwords do not match.')
-      confirmPasswordInput?.reportValidity()
+    passwordInputRef.current?.setCustomValidity('')
+    confirmPasswordInputRef.current?.setCustomValidity('')
+    if (!passwordAssessment.isValid) {
+      passwordInputRef.current?.setCustomValidity(`Use at least ${PASSWORD_MIN_LENGTH} characters with uppercase, lowercase, number, and symbol.`)
+      passwordInputRef.current?.reportValidity()
       return
     }
-    confirmPasswordInput?.setCustomValidity('')
+    if (!passwordsMatch) {
+      confirmPasswordInputRef.current?.setCustomValidity('Passwords do not match.')
+      confirmPasswordInputRef.current?.reportValidity()
+      return
+    }
     await onSubmit?.(formData)
   }
 
   return (
     <section className="w-full max-w-[435px]" aria-labelledby="register-title">
-      <header className="register-stagger-item register-stagger-1 mb-[clamp(40px,5.5vh,56px)] text-center">
+      <header className="register-stagger-item register-stagger-1 mb-[clamp(32px,4.5vh,48px)] text-center">
         <h1 id="register-title" className="whitespace-nowrap text-[clamp(27px,2.64vw,38px)] font-bold leading-[1.14] tracking-[-0.035em] text-[#38323F]">Start Your Fitness Journey</h1>
         <p className="mt-2.5 whitespace-nowrap text-[clamp(12px,1.12vw,16px)] italic leading-6 text-[#7482A4]">Create your account and let Rocco help you reach your goals.</p>
       </header>
       <form onSubmit={handleSubmit} className="w-full">
-        <div className="space-y-[clamp(28px,4.1vh,42px)]">
+        <div className="space-y-[clamp(20px,2.8vh,30px)]">
           <label className="register-stagger-item register-stagger-2 group block" htmlFor="full-name">
             <FieldLabel icon={ICONS.fullName}>Full Name</FieldLabel>
             <input id="full-name" name="fullName" type="text" autoComplete="name" value={formData.fullName} onChange={(event) => setFormData((previous) => ({ ...previous, fullName: event.target.value }))} placeholder="John Doe" required className="mt-2 h-[31px] w-full rounded-none border-0 border-b border-[#38323F]/80 bg-transparent px-0 pb-[7px] text-[15px] leading-5 text-[#38323F] outline-none transition-colors duration-200 placeholder:text-[#38323F]/25 focus:border-[#7482A4] focus:ring-0" />
@@ -89,25 +126,40 @@ export default function RegisterForm({ onSubmit, onLogin, isLoading = false }: R
               <FieldLabel icon={ICONS.password} iconClassName="size-[18px]">Password</FieldLabel>
             </label>
             <span className="relative mt-2 block">
-              <input id="register-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.password} onChange={(event) => setFormData((previous) => ({ ...previous, password: event.target.value }))} placeholder="••••••••••••••" required minLength={8} className="h-[31px] w-full rounded-none border-0 border-b border-[#38323F]/80 bg-transparent px-0 pb-[7px] pr-10 text-[15px] leading-5 tracking-[0.12em] text-[#38323F] outline-none transition-colors duration-200 placeholder:tracking-normal placeholder:text-[#38323F]/25 focus:border-[#7482A4] focus:ring-0" />
+              <input ref={passwordInputRef} id="register-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.password} onFocus={() => setActiveField('password')} onBlur={() => setActiveField(null)} onChange={(event) => { event.currentTarget.setCustomValidity(''); confirmPasswordInputRef.current?.setCustomValidity(''); setFormData((previous) => ({ ...previous, password: event.target.value })) }} placeholder="••••••••••••••" required minLength={PASSWORD_MIN_LENGTH} aria-describedby={showPasswordIndicator ? 'password-strength' : undefined} aria-invalid={formData.password.length > 0 && !passwordAssessment.isValid} className="h-[31px] w-full rounded-none border-0 border-b border-[#38323F]/80 bg-transparent px-0 pb-[7px] pr-10 text-[15px] leading-5 tracking-[0.12em] text-[#38323F] outline-none transition-colors duration-200 placeholder:tracking-normal placeholder:text-[#38323F]/25 focus:border-[#7482A4] focus:ring-0" />
               <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((previous) => !previous)} label="password" />
             </span>
+            {showPasswordIndicator && (
+              <div id="password-strength" className="mt-2 flex items-center gap-2.5" aria-live="polite">
+                <span className="h-1 flex-1 overflow-hidden rounded-full bg-[#38323F]/10" aria-hidden="true">
+                  <span className={`block h-full rounded-full transition-all duration-300 ${strengthStyle?.widthClass ?? 'w-0'} ${strengthStyle?.barClass ?? 'bg-transparent'}`} />
+                </span>
+                <span className={`shrink-0 text-[10px] font-semibold ${strengthStyle?.textClass ?? 'text-[#7B7480]'}`}>
+                  {strengthStyle?.label ?? '8+ · Aa · 1 · @'}
+                </span>
+              </div>
+            )}
           </div>
           <div className="register-stagger-item register-stagger-5 group block">
             <label htmlFor="confirm-password">
               <FieldLabel icon={ICONS.confirmPassword} iconClassName="size-[18px]">Confirm Password</FieldLabel>
             </label>
             <span className="relative mt-2 block">
-              <input id="confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.confirmPassword} onChange={(event) => { event.currentTarget.setCustomValidity(''); setFormData((previous) => ({ ...previous, confirmPassword: event.target.value })) }} placeholder="••••••••••••••" required minLength={8} className="h-[31px] w-full rounded-none border-0 border-b border-[#38323F]/80 bg-transparent px-0 pb-[7px] pr-10 text-[15px] leading-5 tracking-[0.12em] text-[#38323F] outline-none transition-colors duration-200 placeholder:tracking-normal placeholder:text-[#38323F]/25 focus:border-[#7482A4] focus:ring-0" />
+              <input ref={confirmPasswordInputRef} id="confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.confirmPassword} onFocus={() => setActiveField('confirmPassword')} onBlur={() => setActiveField(null)} onChange={(event) => { event.currentTarget.setCustomValidity(''); setFormData((previous) => ({ ...previous, confirmPassword: event.target.value })) }} placeholder="••••••••••••••" required minLength={PASSWORD_MIN_LENGTH} aria-describedby={showConfirmIndicator ? 'confirm-password-status' : undefined} aria-invalid={hasConfirmPassword && !passwordsMatch} className="h-[31px] w-full rounded-none border-0 border-b border-[#38323F]/80 bg-transparent px-0 pb-[7px] pr-10 text-[15px] leading-5 tracking-[0.12em] text-[#38323F] outline-none transition-colors duration-200 placeholder:tracking-normal placeholder:text-[#38323F]/25 focus:border-[#7482A4] focus:ring-0" />
               <PasswordToggle visible={showConfirmPassword} onToggle={() => setShowConfirmPassword((previous) => !previous)} label="confirmation password" />
             </span>
+            {showConfirmIndicator && (
+              <p id="confirm-password-status" aria-live="polite" className={`mt-2 text-[10px] font-semibold transition-colors ${!hasConfirmPassword ? 'text-[#7B7480]' : passwordsMatch ? 'text-[#6F9B83]' : 'text-[#B96F78]'}`}>
+                {!hasConfirmPassword ? 'Enter the same password.' : passwordsMatch ? 'Passwords match.' : 'Passwords do not match.'}
+              </p>
+            )}
           </div>
         </div>
-        <button type="submit" disabled={isLoading} className="register-stagger-item register-stagger-6 mt-[clamp(40px,6.25vh,64px)] flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[10px] bg-[#7482A4] text-[17px] font-bold text-[#F8F8FF] shadow-[0_4px_7px_rgba(116,130,164,0.26)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#697897] hover:shadow-[0_7px_14px_rgba(116,130,164,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F3F6] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
+        <button type="submit" disabled={isLoading} className="register-stagger-item register-stagger-6 mt-[clamp(32px,5vh,50px)] flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[10px] bg-[#7482A4] text-[17px] font-bold text-[#F8F8FF] shadow-[0_4px_7px_rgba(116,130,164,0.26)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#697897] hover:shadow-[0_7px_14px_rgba(116,130,164,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F3F6] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
           {isLoading && <span aria-hidden="true" className="size-4 rounded-full border-2 border-white/40 border-t-white motion-safe:animate-spin" />}
           <span>{isLoading ? 'Creating account...' : 'Create Account'}</span>
         </button>
-        <p className="register-stagger-item register-stagger-7 mt-[25px] text-center text-[14px] text-[#38323F]">
+        <p className="register-stagger-item register-stagger-7 mt-[22px] text-center text-[14px] text-[#38323F]">
           Already have an account?{' '}
           <button type="button" onClick={onLogin} className="font-bold text-[#7482A4] transition-colors hover:text-[#38323F] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]/35">Log in</button>
         </p>
