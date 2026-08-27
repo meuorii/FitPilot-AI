@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { verificationEmailTemplate } from '../templates/VerificationEmail.template';
+import { verificationEmailTemplate } from '../templates/VerificationEmail.template.js';
 
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD } });
 

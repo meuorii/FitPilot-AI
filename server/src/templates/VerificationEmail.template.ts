@@ -31,7 +31,7 @@ export const verificationEmailTemplate = (verificationCode: string): string => {
             <!-- LOGO -->
             <tr>
               <td class="mobile-padding" style="padding:42px 54px 20px;">
-                <img src="YOUR_DIRECT_FITPILOT_LOGO_URL" alt="FitPilot" width="155" style="width:155px;height:auto;display:block;" />
+                <img src="https://i.imgur.com/VLfLa0j.png" alt="FitPilot" width="155" style="width:155px;height:auto;display:block;" />
               </td>
             </tr>
             <!-- HERO -->
@@ -45,7 +45,7 @@ export const verificationEmailTemplate = (verificationCode: string): string => {
                       <p style="margin:0;color:#344967;font-size:15px;line-height:1.8;">Use the 6-digit code below to verify your email address and continue setting up your <strong style="color:#142847;">FitPilot AI</strong> account.</p>
                     </td>
                     <td width="52%" align="center" valign="bottom" class="hero-right" style="width:52%;">
-                      <img src="YOUR_DIRECT_ROCCO_IMAGE_URL" alt="Rocco with your verification code" width="335" class="hero-image" style="width:335px;max-width:335px;height:auto;display:block;margin:0 auto;" />
+                      <img src="https://i.imgur.com/zbbRmrY.png" alt="Rocco with your verification code" width="335" class="hero-image" style="width:335px;max-width:335px;height:auto;display:block;margin:0 auto;" />
                     </td>
                   </tr>
                 </table>
@@ -92,7 +92,7 @@ export const verificationEmailTemplate = (verificationCode: string): string => {
             <!-- FOOTER -->
             <tr>
               <td class="mobile-padding" style="padding:32px 54px;background-color:#f4f8fd;border-top:1px solid #e5edf6;">
-                <img src="YOUR_DIRECT_FITPILOT_LOGO_URL" alt="FitPilot" width="125" style="width:125px;height:auto;display:block;margin-bottom:12px;" />
+                <img src="https://i.imgur.com/VLfLa0j.png" alt="FitPilot" width="125" style="width:125px;height:auto;display:block;margin-bottom:12px;" />
                 <p style="margin:0 0 4px;color:#506985;font-size:12px;">Your AI-powered fitness companion.</p>
                 <p style="margin:0 0 18px;color:#506985;font-size:12px;">Stronger workouts. Smarter nutrition. Better you.</p>
                 <p style="margin:0;color:#94a3b8;font-size:10px;line-height:1.6;">© ${new Date().getFullYear()} FitPilot AI. All rights reserved.</p>
