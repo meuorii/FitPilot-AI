@@ -1,33 +1,29 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import EmailVerificationModal from '../components/Auth/EmailVerificationModal'
 import RegisterForm, { type RegisterCredentials } from '../components/Auth/RegisterForm'
 import { registerUser } from '../services/api/auth'
 import { useToastStore } from '../stores/toastStore'
 
 const REGISTER_ARTWORK = '/Auth/Register/image.png'
-const AUTH_TOKEN_KEY = 'fitpilot_token'
-const AUTH_USER_KEY = 'fitpilot_user'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
   const [isRegistering, setIsRegistering] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const showToast = useToastStore((state) => state.showToast)
   const hideToast = useToastStore((state) => state.hideToast)
 
   const handleRegister = async (credentials: RegisterCredentials) => {
-    setIsRegistering(true)
-    hideToast()
+    setIsRegistering(true); hideToast()
     try {
       const response = await registerUser({ email: credentials.email.trim(), password: credentials.password, full_name: credentials.fullName.trim() })
-      window.localStorage.setItem(AUTH_TOKEN_KEY, response.data.token)
-      window.localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user))
-      showToast({ type: 'success', heading: 'Account created!', subheading: response.message || 'Your FitPilot account is ready.' })
-      navigate('/onboarding', { replace: true })
+      setVerificationEmail(response.data.email); setIsVerificationModalOpen(true)
+      showToast({ type: 'success', heading: 'Check your email', subheading: response.message || 'We sent a 6-digit verification code to your email.' })
     } catch (error) {
       showToast({ type: 'error', heading: 'Registration failed', subheading: error instanceof Error ? error.message : 'We could not create your account. Please try again.' })
-    } finally {
-      setIsRegistering(false)
-    }
+    } finally { setIsRegistering(false) }
   }
 
   return (
@@ -63,6 +59,7 @@ export default function RegisterPage() {
           </section>
         </div>
       </main>
+      <EmailVerificationModal email={verificationEmail} onClose={() => setIsVerificationModalOpen(false)} open={isVerificationModalOpen} />
     </>
   )
 }
