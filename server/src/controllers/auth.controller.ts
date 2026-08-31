@@ -2,13 +2,22 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
+import { env } from '../config/env.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { sendVerificationEmail } from '../services/email.service.js';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) throw new Error('JWT_SECRET is not configured.');
-
 const VERIFICATION_CODE_TTL_MS = 10 * 60 * 1000;
+
+interface TokenUser {
+  id: string;
+  email: string;
+}
+
+const createAccessToken = ({ id, email }: TokenUser): string =>
+  jwt.sign({ id, email }, env.JWT_SECRET, {
+    algorithm: 'HS256',
+    expiresIn: '7d',
+  });
 
 const normalizeEmail = (email: unknown): string => String(email ?? '').trim().toLowerCase();
 const hashVerificationCode = (code: string): string => createHash('sha256').update(code).digest('hex');
@@ -63,7 +72,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     if (!verificationCodesMatch(normalizedCode, user.email_verification_code)) { res.status(400).json({ success: false, message: 'Invalid verification code.', code: 'INVALID_VERIFICATION_CODE' }); return; }
     const { data: verifiedUser, error: updateError } = await supabaseAdmin.from('profiles').update({ email_verified: true, email_verification_code: null, email_verification_expires_at: null, updated_at: new Date().toISOString() }).eq('id', user.id).select('id, email, full_name, is_onboarded, email_verified').single();
     if (updateError) throw updateError;
-    const token = jwt.sign({ id: verifiedUser.id, email: verifiedUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = createAccessToken(verifiedUser);
     res.status(200).json({ success: true, message: 'Email verified successfully.', data: { token, user: { id: verifiedUser.id, email: verifiedUser.email, full_name: verifiedUser.full_name, is_onboarded: verifiedUser.is_onboarded, email_verified: verifiedUser.email_verified }, next_step: verifiedUser.is_onboarded ? 'dashboard' : 'onboarding' } });
   } catch (err) {
     console.error('Verify email error:', err);
@@ -102,7 +111,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const passwordMatches = await bcrypt.compare(String(password), user.password_hash);
     if (!passwordMatches) { res.status(401).json({ success: false, message: 'Invalid email or password' }); return; }
     if (!user.email_verified) { res.status(403).json({ success: false, message: 'Please verify your email before logging in.', code: 'EMAIL_NOT_VERIFIED', data: { email: user.email } }); return; }
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = createAccessToken(user);
     res.status(200).json({ success: true, message: 'Logged in successfully', data: { token, user: { id: user.id, email: user.email, full_name: user.full_name, is_onboarded: user.is_onboarded, email_verified: user.email_verified } } });
   } catch (err) {
     console.error('Login error:', err);
