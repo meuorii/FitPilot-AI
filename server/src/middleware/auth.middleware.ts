@@ -4,32 +4,39 @@ import { env } from '../config/env.js';
 
 declare global {
   namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email?: string;
-      };
-    }
+    interface Request { user?: { id: string; email?: string } }
   }
 }
 
-interface DecodedToken {
-  id: string;
-  email?: string;
-  iat?: number;
-  exp?: number;
-}
+const getBearerToken = (authorizationHeader: string | undefined): string | null => {
+  if (!authorizationHeader) return null;
+  const [scheme, token, ...extraParts] = authorizationHeader.trim().split(/\s+/);
+  return (scheme?.toLowerCase() === 'bearer' && token && extraParts.length === 0) ? token : null;
+};
 
-export const authenticateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const authenticateUser = (req: Request, res: Response, next: NextFunction): void => {
+  const token = getBearerToken(req.get('authorization'));
+  if (!token) {
+    res.status(401).json({ success: false, error: 'Unauthorized', message: 'Missing, malformed, or empty Bearer token' });
+    return;
+  }
   try {
-    const token = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null;
-    if (!token) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'Missing, malformed, or empty Bearer token' }); return; }
-    const decoded = jwt.verify(token, env.JWT_SECRET || process.env.JWT_SECRET || 'fallback_secret_key') as DecodedToken;
-    if (!decoded?.id) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid token payload' }); return; }
-    req.user = { id: decoded.id, email: decoded.email };
+    const decoded = jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] });
+    if (typeof decoded === 'string' || typeof decoded.id !== 'string' || !decoded.id.trim()) {
+      res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid token payload' });
+      return;
+    }
+    req.user = { id: decoded.id, ...(typeof decoded.email === 'string' ? { email: decoded.email } : {}) };
     next();
   } catch (err) {
-    if (err instanceof jwt.JsonWebTokenError) { res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid or expired authentication token' }); return; }
-    res.status(500).json({ success: false, error: 'Internal Server Error', message: err instanceof Error ? err.message : 'Authentication check failed' });
+    if (err instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ success: false, error: 'Unauthorized', message: 'Authentication token has expired' });
+      return;
+    }
+    if (err instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid authentication token' });
+      return;
+    }
+    next(err);
   }
 };
