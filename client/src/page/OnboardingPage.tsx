@@ -12,13 +12,16 @@ import type { CalculateGoalsRequest, CompleteOnboardingRequest, GoalOption, Prof
 
 interface OnboardingPageProps { token?: string }
 type OnboardingStep = 1 | 2 | 3 | 4
+const AUTH_TOKEN_KEY = 'fitpilot_token'
 
 const initialFormData: AboutYouFormData = { age: '', gender: '', height_cm: '', weight_kg: '', activity_level: '' }
 
-function readSessionToken(providedToken?: string) {
-  if (providedToken) return providedToken
+function getAccessToken(providedToken?: string) {
+  const tokenFromProps = providedToken?.trim()
+  if (tokenFromProps) return tokenFromProps
   if (typeof window === 'undefined') return null
-  return window.localStorage.getItem('token') ?? window.localStorage.getItem('accessToken') ?? window.localStorage.getItem('access_token') ?? window.localStorage.getItem('authToken')
+  const storedToken = window.localStorage.getItem(AUTH_TOKEN_KEY)?.trim()
+  return storedToken || null
 }
 
 function toErrorMessage(error: unknown, fallback: string) {
@@ -34,6 +37,7 @@ function createGoalsPayload(formData: AboutYouFormData): CalculateGoalsRequest |
 export default function OnboardingPage({ token }: OnboardingPageProps) {
   const navigate = useNavigate()
   const showToast = useToastStore((state) => state.showToast)
+  const [accessToken] = useState<string | null>(() => getAccessToken(token))
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1)
   const [formData, setFormData] = useState<AboutYouFormData>(initialFormData)
   const [goals, setGoals] = useState<GoalOption[]>([])
@@ -63,14 +67,13 @@ export default function OnboardingPage({ token }: OnboardingPageProps) {
       const message = 'Review your profile details and select an activity level before continuing.'
       setError(message); notifyError('A few details need attention', message); return
     }
-    const sessionToken = readSessionToken(token)
-    if (!sessionToken) {
-      const message = 'Your session token is missing. Please sign in again before continuing.'
+    if (!accessToken) {
+      const message = 'Your access token is missing. Please verify your email or sign in again.'
       setError(message); notifyError('Session required', message); return
     }
     setIsLoading(true); setError(null)
     try {
-      const response = await calculateGoals(payload, sessionToken)
+      const response = await calculateGoals(payload, accessToken)
       const recommended = response.data.find((goal) => goal.is_recommended) ?? response.data[0] ?? null
       if (response.data.length === 0) throw new Error('No goal options were returned. Please try again.')
       setGoals(response.data); setSelectedGoal(recommended); setProfile(null); setCurrentStep(3)
@@ -90,15 +93,14 @@ export default function OnboardingPage({ token }: OnboardingPageProps) {
       const message = 'Your profile details are incomplete. Go back and review Step 2.'
       setError(message); notifyError('Profile details missing', message); return
     }
-    const sessionToken = readSessionToken(token)
-    if (!sessionToken) {
-      const message = 'Your session token is missing. Please sign in again before continuing.'
+    if (!accessToken) {
+      const message = 'Your access token is missing. Please verify your email or sign in again.'
       setError(message); notifyError('Session required', message); return
     }
     const payload: CompleteOnboardingRequest = { age: profilePayload.age, gender: profilePayload.gender, height_cm: profilePayload.height_cm, current_weight_kg: profilePayload.weight_kg, target_weight_kg: selectedGoal.recommended_target_weight_kg, activity_level: profilePayload.activity_level, primary_goal: selectedGoal.goal, is_onboarded: true }
     setIsLoading(true); setError(null)
     try {
-      const response = await completeOnboarding(payload, sessionToken)
+      const response = await completeOnboarding(payload, accessToken)
       setProfile(response.data); setCurrentStep(4)
       showToast({ type: 'success', heading: 'Your FitPilot plan is ready', subheading: 'Rocco built your starting targets from your completed profile.', position: 'top-right', duration: 4500, showCloseButton: true, showProgress: true })
     } catch (requestError) {
