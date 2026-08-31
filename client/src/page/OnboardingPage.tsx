@@ -20,8 +20,7 @@ function getAccessToken(providedToken?: string) {
   const tokenFromProps = providedToken?.trim()
   if (tokenFromProps) return tokenFromProps
   if (typeof window === 'undefined') return null
-  const storedToken = window.localStorage.getItem(AUTH_TOKEN_KEY)?.trim()
-  return storedToken || null
+  return window.localStorage.getItem(AUTH_TOKEN_KEY)?.trim() || null
 }
 
 function toErrorMessage(error: unknown, fallback: string) {
@@ -102,7 +101,7 @@ export default function OnboardingPage({ token }: OnboardingPageProps) {
     try {
       const response = await completeOnboarding(payload, accessToken)
       setProfile(response.data); setCurrentStep(4)
-      showToast({ type: 'success', heading: 'Your FitPilot plan is ready', subheading: 'Rocco built your starting targets from your completed profile.', position: 'top-right', duration: 4500, showCloseButton: true, showProgress: true })
+      showToast({ type: 'success', heading: 'Your FitPilot plan is ready', subheading: 'Your starting targets have been saved to your profile.', position: 'top-right', duration: 4500, showCloseButton: true, showProgress: true })
     } catch (requestError) {
       const message = toErrorMessage(requestError, 'We could not save your onboarding profile. Please try again.')
       setError(message); notifyError('Couldn’t finish onboarding', message)
@@ -112,14 +111,29 @@ export default function OnboardingPage({ token }: OnboardingPageProps) {
   const finishOnboarding = () => { navigate('/dashboard', { replace: true }) }
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-[#F5F3F6] font-sans text-[#38323F] lg:grid lg:grid-cols-[350px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]">
+    <div className="min-h-dvh overflow-x-hidden bg-[#F5F3F6] font-sans text-[#38323F] lg:grid lg:h-dvh lg:grid-cols-[330px_minmax(0,1fr)] lg:overflow-hidden xl:grid-cols-[360px_minmax(0,1fr)]">
       <OnboardingSidebar currentStep={currentStep} />
-      <main className="min-w-0">
-        {currentStep === 1 && <WelcomeStep onContinue={() => setCurrentStep(2)} />}
-        {currentStep === 2 && <AboutYouStep formData={formData} isLoading={isLoading} error={error} onChange={updateFormField} onBack={goBack} onContinue={submitAboutYou} />}
-        {currentStep === 3 && <GoalStep goals={goals} selectedGoal={selectedGoal} isLoading={isLoading} error={error} onSelect={(goal) => { setSelectedGoal(goal); setError(null) }} onBack={goBack} onContinue={submitSelectedGoal} />}
-        {currentStep === 4 && profile && <PlanStep profile={profile} onBack={goBack} onFinish={finishOnboarding} />}
+      <main className="onboarding-scrollbar min-w-0 lg:h-dvh lg:overflow-y-auto">
+        <div key={currentStep} className="onboarding-step-enter">
+          {currentStep === 1 && <WelcomeStep onContinue={() => setCurrentStep(2)} />}
+          {currentStep === 2 && <AboutYouStep formData={formData} isLoading={isLoading} error={error} onChange={updateFormField} onBack={goBack} onContinue={submitAboutYou} />}
+          {currentStep === 3 && <GoalStep goals={goals} selectedGoal={selectedGoal} isLoading={isLoading} error={error} onSelect={(goal) => { setSelectedGoal(goal); setError(null) }} onBack={goBack} onContinue={submitSelectedGoal} />}
+          {currentStep === 4 && profile && <PlanStep profile={profile} onBack={goBack} onFinish={finishOnboarding} />}
+        </div>
       </main>
+      <style>{`
+        @keyframes onboarding-step-enter {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .onboarding-step-enter { animation: onboarding-step-enter 220ms ease-out both; }
+        .onboarding-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(116, 130, 164, 0.42) transparent; }
+        .onboarding-scrollbar::-webkit-scrollbar { width: 8px; }
+        .onboarding-scrollbar::-webkit-scrollbar-thumb { background: rgba(116, 130, 164, 0.42); border: 2px solid #F5F3F6; border-radius: 999px; }
+        @media (prefers-reduced-motion: reduce) {
+          .onboarding-step-enter { animation: none; }
+        }
+      `}</style>
     </div>
   )
 }
