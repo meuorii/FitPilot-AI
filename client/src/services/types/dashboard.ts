@@ -1,19 +1,4 @@
-export type PrimaryGoal =
-  | 'lose_weight'
-  | 'lose_fat'
-  | 'maintain'
-  | 'gain_muscle';
-
-export interface DashboardUser {
-  full_name: string;
-  avatar_url: string | null;
-  primary_goal: PrimaryGoal;
-  streak_count: number;
-  workout_days_per_week: number;
-  is_onboarded: boolean;
-}
-
-export interface NutritionProgress {
+export interface DashboardMetric {
   consumed: number;
   target: number;
   remaining: number;
@@ -22,32 +7,43 @@ export interface NutritionProgress {
 }
 
 export interface DashboardNutrition {
-  calories: NutritionProgress;
-  protein: NutritionProgress;
-  carbs: NutritionProgress;
-  fat: NutritionProgress;
+  calories: DashboardMetric;
+  protein: DashboardMetric;
+  carbs: DashboardMetric;
+  fat: DashboardMetric;
   meals_logged: number;
 }
 
-// Replace these placeholder records once the API returns populated examples.
-export type DashboardMeal = Record<string, unknown>;
-export type DashboardWorkout = Record<string, unknown>;
-export type DashboardWorkoutSession = Record<string, unknown>;
-
-export interface DashboardToday {
-  date: string;
-  nutrition: DashboardNutrition;
-  meals: DashboardMeal[];
-  workout: DashboardWorkout | null;
-  workout_sessions: DashboardWorkoutSession[];
+export interface DashboardMeal {
+  id: string | number;
+  name?: string | null;
+  meal_type?: string | null;
+  calories?: number | null;
+  logged_at?: string | null;
 }
 
-export interface WeeklyWorkoutProgress {
-  completed: number;
-  target: number;
+export type DashboardWorkoutStatus =
+  | "started"
+  | "in_progress"
+  | "completed"
+  | "cancelled"
+  | string;
+
+export interface DashboardWorkout {
+  id: string | number;
+  routine_id?: string | number | null;
+  routine_name: string;
+  status: DashboardWorkoutStatus;
+  exercises_completed: number;
+  total_exercises: number;
+  sets_completed: number;
+  total_sets: number;
+  total_volume_kg: number;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 
-export interface DashboardActivityDay {
+export interface DashboardWeekActivity {
   date: string;
   day: string;
   workouts: number;
@@ -55,11 +51,17 @@ export interface DashboardActivityDay {
   total_volume_kg: number;
 }
 
+export interface DashboardWeekWorkouts {
+  completed: number;
+  target: number;
+  percentage?: number;
+}
+
 export interface DashboardWeek {
   start_date: string;
   end_date: string;
-  workouts: WeeklyWorkoutProgress;
-  activity: DashboardActivityDay[];
+  workouts: DashboardWeekWorkouts;
+  activity: DashboardWeekActivity[];
 }
 
 export interface DashboardCalendar {
@@ -69,29 +71,45 @@ export interface DashboardCalendar {
   meal_log_dates: string[];
 }
 
-export interface CoachCheckinAction {
-  label: string;
-  route: string;
+export interface DashboardTodaySummary {
+  meals_logged: number;
+  calories_consumed: number;
+  calories_remaining: number;
+  protein_consumed: number;
+  protein_remaining: number;
+  workouts_completed: number;
+  workouts_started: number;
+  sets_completed: number;
+  total_volume_kg: number;
 }
 
-export interface DashboardCoachCheckin {
-  type: string;
-  title: string;
-  message: string;
-  suggestion: string;
-  action: CoachCheckinAction;
+export interface DashboardUser {
+  full_name: string;
+  avatar_url: string | null;
+  primary_goal: string;
+  streak_count: number;
+  workout_days_per_week: number;
+  is_onboarded: boolean;
 }
 
-export interface DashboardSummaryData {
+export interface DashboardToday {
+  date: string;
+  nutrition: DashboardNutrition;
+  meals: DashboardMeal[];
+  workout: DashboardWorkout | null;
+  workout_sessions: DashboardWorkout[];
+}
+
+export interface DashboardData {
   user: DashboardUser;
   today: DashboardToday;
   week: DashboardWeek;
   calendar: DashboardCalendar;
-  coach_checkin: DashboardCoachCheckin;
+  today_summary: DashboardTodaySummary;
 }
 
-export interface DashboardSummaryResponse {
+export interface DashboardResponse {
   success: boolean;
   message: string;
-  data: DashboardSummaryData;
+  data: DashboardData;
 }
