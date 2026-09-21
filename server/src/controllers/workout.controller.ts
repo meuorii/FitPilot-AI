@@ -81,6 +81,18 @@ const toPositiveInteger = (value: unknown, fallback: number): number => {
   return Number.isInteger(parsed) ? parsed : Number.NaN;
 };
 
+const toNonNegativeInteger = (value: unknown, fallback: number): number => {
+  const parsed = Number(value ?? fallback);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : Number.NaN;
+};
+
+class SplitValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SplitValidationError';
+  }
+}
+
 const sortRoutine = <T extends Record<string, any> | null>(routine: T): T => {
   if (!routine) return routine;
   if (Array.isArray(routine.routine_exercises)) {
@@ -234,8 +246,17 @@ const cloneRoutineToUser = async (
   return result;
 };
 
-const validateSplitDays = async (days: SplitDayInput[], userId: string): Promise<Array<Record<string, unknown>>> => {
-  if (!Array.isArray(days)) throw new Error('Days must be an array.');
+const validateSplitDays = async (
+  days: SplitDayInput[],
+  userId: string,
+): Promise<Array<Record<string, unknown>>> => {
+  if (!Array.isArray(days)) {
+    throw new SplitValidationError('Days must be an array.');
+  }
+
+  if (days.length > 7) {
+    throw new SplitValidationError('A workout split cannot contain more than 7 days.');
+  }
 
   const seenDays = new Set<number>();
   const routineIds = new Set<string>();
@@ -243,18 +264,43 @@ const validateSplitDays = async (days: SplitDayInput[], userId: string): Promise
   const normalized = days.map((item, index) => {
     const dayOfWeek = Number(item.day_of_week);
     const isRestDay = Boolean(item.is_rest_day);
-    const routineId = item.routine_id || null;
-    const orderIndex = toPositiveInteger(item.order_index, index + 1);
+    const routineId = item.routine_id ? String(item.routine_id).trim() : null;
+
+    // Split ordering is intentionally independent from day_of_week.
+    // This allows a schedule to visually/start logically on any weekday.
+    // The frontend may send 0-based order indexes (0, 1, 2, ...).
+    const orderIndex = toNonNegativeInteger(item.order_index, index);
 
     if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
-      throw new Error(`day_of_week must be between 0 and 6 for day ${index + 1}.`);
+      throw new SplitValidationError(
+        `day_of_week must be between 0 and 6 for day ${index + 1}.`,
+      );
     }
-    if (seenDays.has(dayOfWeek)) throw new Error(`Day ${dayOfWeek} appears more than once in the split.`);
+
+    if (seenDays.has(dayOfWeek)) {
+      throw new SplitValidationError(
+        `Day ${dayOfWeek} appears more than once in the split.`,
+      );
+    }
     seenDays.add(dayOfWeek);
 
-    if (isRestDay && routineId) throw new Error(`Rest day ${dayOfWeek} cannot have a routine.`);
-    if (!isRestDay && !routineId) throw new Error(`Workout day ${dayOfWeek} requires a routine.`);
-    if (!Number.isInteger(orderIndex) || orderIndex <= 0) throw new Error(`Invalid order index for day ${dayOfWeek}.`);
+    if (isRestDay && routineId) {
+      throw new SplitValidationError(
+        `Rest day ${dayOfWeek} cannot have a routine.`,
+      );
+    }
+
+    if (!isRestDay && !routineId) {
+      throw new SplitValidationError(
+        `Workout day ${dayOfWeek} requires a routine.`,
+      );
+    }
+
+    if (!Number.isInteger(orderIndex) || orderIndex < 0) {
+      throw new SplitValidationError(
+        `Invalid order index for day ${dayOfWeek}. order_index must be 0 or greater.`,
+      );
+    }
 
     if (routineId) routineIds.add(routineId);
 
@@ -268,7 +314,11 @@ const validateSplitDays = async (days: SplitDayInput[], userId: string): Promise
 
   for (const routineId of routineIds) {
     const routine = await getVisibleRoutine(routineId, userId);
-    if (!routine) throw new Error(`Routine ${routineId} was not found or is unavailable.`);
+    if (!routine) {
+      throw new SplitValidationError(
+        `Routine ${routineId} was not found or is unavailable.`,
+      );
+    }
   }
 
   return normalized;
@@ -930,9 +980,24 @@ export const createSplit = async (req: Request, res: Response): Promise<void> =>
     const complete = await getSplitDetails(split.id, userId);
     res.status(201).json({ success: true, message: 'Workout split created successfully.', data: complete });
   } catch (error) {
-    if (createdSplitId) await supabaseAdmin.from('workout_splits').delete().eq('id', createdSplitId);
+    if (createdSplitId) {
+      await supabaseAdmin
+        .from('workout_splits')
+        .delete()
+        .eq('id', createdSplitId);
+    }
+
     console.error('createSplit error:', error);
-    res.status(500).json({ success: false, message: errorMessage(error, 'Failed to create workout split.') });
+
+    if (error instanceof SplitValidationError) {
+      res.status(400).json({ success: false, message: error.message });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errorMessage(error, 'Failed to create workout split.'),
+    });
   }
 };
 
@@ -1017,7 +1082,16 @@ export const updateSplit = async (req: Request, res: Response): Promise<void> =>
     res.status(200).json({ success: true, message: 'Workout split updated successfully.', data: updated });
   } catch (error) {
     console.error('updateSplit error:', error);
-    res.status(500).json({ success: false, message: errorMessage(error, 'Failed to update workout split.') });
+
+    if (error instanceof SplitValidationError) {
+      res.status(400).json({ success: false, message: error.message });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errorMessage(error, 'Failed to update workout split.'),
+    });
   }
 };
 
@@ -1136,6 +1210,28 @@ export const duplicateSplitDay = async (req: Request, res: Response): Promise<vo
       routineId = cloned.id;
     }
 
+    const existingOrderIndexes = (split.days ?? [])
+      .map((day: any) => Number(day.order_index))
+      .filter((value: number) => Number.isInteger(value) && value >= 0);
+
+    const nextOrderIndex =
+      existingOrderIndexes.length > 0
+        ? Math.max(...existingOrderIndexes) + 1
+        : 0;
+
+    const requestedOrderIndex = toNonNegativeInteger(
+      req.body?.order_index,
+      nextOrderIndex,
+    );
+
+    if (!Number.isInteger(requestedOrderIndex) || requestedOrderIndex < 0) {
+      res.status(400).json({
+        success: false,
+        message: 'order_index must be 0 or greater.',
+      });
+      return;
+    }
+
     const { data, error } = await supabaseAdmin
       .from('workout_split_days')
       .insert({
@@ -1143,7 +1239,7 @@ export const duplicateSplitDay = async (req: Request, res: Response): Promise<vo
         day_of_week: targetDay,
         routine_id: routineId,
         is_rest_day: Boolean(sourceDay.is_rest_day),
-        order_index: Number(req.body?.order_index ?? targetDay + 1),
+        order_index: requestedOrderIndex,
       })
       .select()
       .single();
