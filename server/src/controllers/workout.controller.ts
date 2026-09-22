@@ -86,8 +86,17 @@ const toNonNegativeInteger = (value: unknown, fallback: number): number => {
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : Number.NaN;
 };
 
-const WEEKDAY_TO_INDEX: Record<string, number> = {
-  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+const weekdayToIndex = (weekday: string): number | null => {
+  switch (weekday) {
+    case 'Sun': return 0;
+    case 'Mon': return 1;
+    case 'Tue': return 2;
+    case 'Wed': return 3;
+    case 'Thu': return 4;
+    case 'Fri': return 5;
+    case 'Sat': return 6;
+    default: return null;
+  }
 };
 
 /**
@@ -112,7 +121,8 @@ const resolveDayOfWeek = (rawDay: unknown, rawTimezone?: unknown): number => {
   if (timeZone) {
     try {
       const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(new Date());
-      if (weekday in WEEKDAY_TO_INDEX) return WEEKDAY_TO_INDEX[weekday];
+      const index = weekdayToIndex(weekday);
+      if (index !== null) return index;
     } catch {
       // Invalid IANA timezone string — fall through to server-local time below.
     }
