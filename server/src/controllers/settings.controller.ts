@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 
@@ -81,6 +82,64 @@ const PRIMARY_GOALS = new Set<PrimaryGoal>([
   'maintain_weight',
   'gain_muscle',
 ]);
+
+const PROFILE_AVATAR_BUCKET = 'profile-avatars';
+
+const AVATAR_EXTENSION_BY_MIME: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+const getOwnedAvatarStoragePath = (
+  avatarUrl: string | null,
+  userId: string,
+): string | null => {
+  if (!avatarUrl) {
+    return null;
+  }
+
+  try {
+    const url = new URL(avatarUrl);
+    const marker = `/storage/v1/object/public/${PROFILE_AVATAR_BUCKET}/`;
+    const markerIndex = url.pathname.indexOf(marker);
+
+    if (markerIndex < 0) {
+      return null;
+    }
+
+    const encodedPath = url.pathname.slice(
+      markerIndex + marker.length,
+    );
+
+    const path = decodeURIComponent(encodedPath);
+
+    return path.startsWith(`${userId}/`)
+      ? path
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+const removeAvatarObject = async (
+  path: string | null,
+): Promise<void> => {
+  if (!path) {
+    return;
+  }
+
+  const { error } = await supabaseAdmin.storage
+    .from(PROFILE_AVATAR_BUCKET)
+    .remove([path]);
+
+  if (error) {
+    console.error(
+      '🔥 [Settings Avatar Storage Cleanup Error]:',
+      error,
+    );
+  }
+};
 
 const getUserId = (req: Request): string | null => {
   const userId = req.user?.id;
@@ -597,6 +656,263 @@ export const updateProfileSettings =
       });
     }
   };
+
+
+// -----------------------------------------------------------------------------
+// PATCH /api/v1/settings/avatar
+// multipart/form-data field: avatar
+// -----------------------------------------------------------------------------
+
+export const updateAvatar = async (
+  req: Request,
+  res: Response,
+) => {
+  let uploadedPath: string | null = null;
+
+  try {
+    const userId = getUserId(req);
+
+    if (!userId) {
+      return respondUnauthorized(res);
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Avatar image is required.',
+      });
+    }
+
+    const extension =
+      AVATAR_EXTENSION_BY_MIME[req.file.mimetype];
+
+    if (!extension) {
+      return res.status(400).json({
+        success: false,
+        error:
+          'Avatar must be a JPG, PNG, or WebP image.',
+      });
+    }
+
+    const currentProfile =
+      await loadSettingsProfile(userId);
+
+    if (!currentProfile) {
+      return respondProfileNotFound(res);
+    }
+
+    uploadedPath =
+      `${userId}/${randomUUID()}.${extension}`;
+
+    const avatarStorage =
+      supabaseAdmin.storage.from(
+        PROFILE_AVATAR_BUCKET,
+      );
+
+    const {
+      error: uploadError,
+    } = await avatarStorage.upload(
+      uploadedPath,
+      req.file.buffer,
+      {
+        contentType: req.file.mimetype,
+        upsert: false,
+        cacheControl: '3600',
+      },
+    );
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const {
+      data: publicUrlData,
+    } = avatarStorage.getPublicUrl(
+      uploadedPath,
+    );
+
+    const avatarUrl =
+      publicUrlData.publicUrl;
+
+    if (!avatarUrl) {
+      await removeAvatarObject(
+        uploadedPath,
+      );
+      uploadedPath = null;
+
+      throw new Error(
+        'Failed to create the avatar public URL.',
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        avatar_url: avatarUrl,
+        updated_at:
+          new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select(PROFILE_SELECT)
+      .maybeSingle();
+
+    if (error || !data) {
+      await removeAvatarObject(
+        uploadedPath,
+      );
+      uploadedPath = null;
+
+      if (error) {
+        throw error;
+      }
+
+      return respondProfileNotFound(res);
+    }
+
+    /*
+     * The database already points to the new file.
+     * Old storage cleanup is best-effort so a cleanup
+     * failure never rolls the user back to a stale avatar.
+     */
+    const previousAvatarPath =
+      getOwnedAvatarStoragePath(
+        currentProfile.avatar_url,
+        userId,
+      );
+
+    if (
+      previousAvatarPath &&
+      previousAvatarPath !==
+        uploadedPath
+    ) {
+      await removeAvatarObject(
+        previousAvatarPath,
+      );
+    }
+
+    uploadedPath = null;
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Profile photo updated successfully.',
+      data: toSettingsResponse(
+        data as SettingsProfileRow,
+      ),
+    });
+  } catch (error: unknown) {
+    if (uploadedPath) {
+      await removeAvatarObject(
+        uploadedPath,
+      );
+    }
+
+    console.error(
+      '🔥 [Settings Avatar Update Error]:',
+      error,
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        'Failed to update profile photo.',
+    });
+  }
+};
+
+// -----------------------------------------------------------------------------
+// DELETE /api/v1/settings/avatar
+// -----------------------------------------------------------------------------
+
+export const removeAvatar = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = getUserId(req);
+
+    if (!userId) {
+      return respondUnauthorized(res);
+    }
+
+    const currentProfile =
+      await loadSettingsProfile(userId);
+
+    if (!currentProfile) {
+      return respondProfileNotFound(res);
+    }
+
+    if (!currentProfile.avatar_url) {
+      return res.status(200).json({
+        success: true,
+        message:
+          'Profile photo is already removed.',
+        data: toSettingsResponse(
+          currentProfile,
+        ),
+      });
+    }
+
+    const oldAvatarPath =
+      getOwnedAvatarStoragePath(
+        currentProfile.avatar_url,
+        userId,
+      );
+
+    const {
+      data,
+      error,
+    } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        avatar_url: null,
+        updated_at:
+          new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select(PROFILE_SELECT)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      return respondProfileNotFound(res);
+    }
+
+    /*
+     * Clear the DB first. If object cleanup fails,
+     * the account no longer references the old file.
+     */
+    await removeAvatarObject(
+      oldAvatarPath,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Profile photo removed successfully.',
+      data: toSettingsResponse(
+        data as SettingsProfileRow,
+      ),
+    });
+  } catch (error: unknown) {
+    console.error(
+      '🔥 [Settings Avatar Remove Error]:',
+      error,
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        'Failed to remove profile photo.',
+    });
+  }
+};
 
 // -----------------------------------------------------------------------------
 // PATCH /api/v1/settings/goals
