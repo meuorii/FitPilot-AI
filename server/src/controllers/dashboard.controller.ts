@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { supabaseAdmin } from '../config/supabase';
+import { supabaseAdmin } from '../config/supabase.js';
 
 const clampPercentage = (consumed: number, target: number): number => target <= 0 ? 0 : Math.round((consumed / target) * 100);
 const round1 = (value: number): number => Number(value.toFixed(1));
