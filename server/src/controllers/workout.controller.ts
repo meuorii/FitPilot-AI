@@ -86,6 +86,41 @@ const toNonNegativeInteger = (value: unknown, fallback: number): number => {
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : Number.NaN;
 };
 
+const WEEKDAY_TO_INDEX: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+};
+
+/**
+ * Resolves "today's" day_of_week (0-6, Sun-Sat).
+ *
+ * IMPORTANT: `new Date().getDay()` reads the day of week in the SERVER's
+ * timezone, not the user's. On a UTC-hosted server, a user in the
+ * Philippines (UTC+8) will see "yesterday's" workout for the first ~8
+ * hours of their calendar day. To avoid that:
+ *   1. If the caller passes an explicit day_of_week, always trust it
+ *      (the client can compute this correctly from the device's local time).
+ *   2. Else if the caller passes an IANA `timezone` (e.g. "Asia/Manila"),
+ *      compute the day of week in that timezone.
+ *   3. Only fall back to the server's own local clock as a last resort.
+ */
+const resolveDayOfWeek = (rawDay: unknown, rawTimezone?: unknown): number => {
+  if (rawDay !== undefined && rawDay !== null && String(rawDay).trim() !== '') {
+    return Number(rawDay);
+  }
+
+  const timeZone = typeof rawTimezone === 'string' && rawTimezone.trim() ? rawTimezone.trim() : null;
+  if (timeZone) {
+    try {
+      const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(new Date());
+      if (weekday in WEEKDAY_TO_INDEX) return WEEKDAY_TO_INDEX[weekday];
+    } catch {
+      // Invalid IANA timezone string — fall through to server-local time below.
+    }
+  }
+
+  return new Date().getDay();
+};
+
 class SplitValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -1291,8 +1326,7 @@ export const getTodayWorkout = async (req: Request, res: Response): Promise<void
     const userId = getUserId(req);
     if (!userId) { sendUnauthorized(res); return; }
 
-    const raw = req.query.day_of_week;
-    const dayOfWeek = raw === undefined ? new Date().getDay() : Number(raw);
+    const dayOfWeek = resolveDayOfWeek(req.query.day_of_week, req.query.timezone);
     if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
       res.status(400).json({ success: false, message: 'day_of_week must be between 0 and 6.' });
       return;
@@ -1311,8 +1345,7 @@ export const getWorkoutOverview = async (req: Request, res: Response): Promise<v
     const userId = getUserId(req);
     if (!userId) { sendUnauthorized(res); return; }
 
-    const raw = req.query.day_of_week;
-    const dayOfWeek = raw === undefined ? new Date().getDay() : Number(raw);
+    const dayOfWeek = resolveDayOfWeek(req.query.day_of_week, req.query.timezone);
     if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
       res.status(400).json({ success: false, message: 'day_of_week must be between 0 and 6.' });
       return;
@@ -1432,7 +1465,7 @@ export const startWorkoutSession = async (req: Request, res: Response): Promise<
     }
 
     if (!routineId) {
-      const dayOfWeek = Number(req.body?.day_of_week ?? new Date().getDay());
+      const dayOfWeek = resolveDayOfWeek(req.body?.day_of_week, req.body?.timezone);
       if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
         res.status(400).json({ success: false, message: 'day_of_week must be between 0 and 6.' });
         return;
