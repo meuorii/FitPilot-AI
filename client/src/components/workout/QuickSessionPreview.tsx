@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
 } from 'react'
@@ -18,6 +19,10 @@ import type {
 } from '../../services/types/workout'
 import { useToastStore } from '../../stores/toastStore'
 import { WorkoutExerciseImage } from './WorkoutExerciseImage'
+import {
+  playRestCompleteAlarm,
+  unlockRestAlarm,
+} from './restAlarm.utils'
 import {
   getExerciseInstructions,
   resolveWorkoutExercise,
@@ -86,6 +91,12 @@ export function QuickSessionPreview({
     restSeconds,
     setRestSeconds,
   ] = useState(0)
+
+  const previousRestSecondsRef =
+    useRef(0)
+
+  const skipRestAlarmRef =
+    useRef(false)
 
   const lastMatchingSet =
     useMemo(() => {
@@ -156,6 +167,28 @@ export function QuickSessionPreview({
       window.clearInterval(timer)
   }, [restSeconds > 0])
 
+  useEffect(() => {
+    const previous =
+      previousRestSecondsRef.current
+
+    if (
+      previous > 0 &&
+      restSeconds === 0
+    ) {
+      if (
+        !skipRestAlarmRef.current
+      ) {
+        void playRestCompleteAlarm()
+      }
+
+      skipRestAlarmRef.current =
+        false
+    }
+
+    previousRestSecondsRef.current =
+      restSeconds
+  }, [restSeconds])
+
   if (!session) {
     return (
       <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-6">
@@ -222,6 +255,13 @@ export function QuickSessionPreview({
       ) {
         return
       }
+
+      /*
+       * Prime Web Audio directly from the user's
+       * Complete Set click. Browsers may otherwise
+       * block sound started later by the timer.
+       */
+      void unlockRestAlarm()
 
       try {
         const response =
@@ -446,9 +486,11 @@ export function QuickSessionPreview({
 
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
+              skipRestAlarmRef.current =
+                true
               setRestSeconds(0)
-            }
+            }}
             disabled={
               restSeconds === 0
             }

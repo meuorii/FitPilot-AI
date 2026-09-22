@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
 } from 'react'
@@ -22,6 +23,10 @@ import {
 import type { WorkoutExercise } from '../../../services/types/workout'
 import { useToastStore } from '../../../stores/toastStore'
 import { WorkoutExerciseImage } from '../WorkoutExerciseImage'
+import {
+  playRestCompleteAlarm,
+  unlockRestAlarm,
+} from '../restAlarm.utils'
 import {
   getExerciseInstructions,
   resolveWorkoutExercise,
@@ -98,6 +103,12 @@ export function ActiveWorkoutModal({
     confirmFinish,
     setConfirmFinish,
   ] = useState(false)
+
+  const previousRestSecondsRef =
+    useRef(0)
+
+  const skipRestAlarmRef =
+    useRef(false)
 
   const session =
     sessionQuery.data?.data ??
@@ -230,6 +241,28 @@ export function ActiveWorkoutModal({
       window.clearInterval(timer)
   }, [restSeconds > 0])
 
+  useEffect(() => {
+    const previous =
+      previousRestSecondsRef.current
+
+    if (
+      previous > 0 &&
+      restSeconds === 0
+    ) {
+      if (
+        !skipRestAlarmRef.current
+      ) {
+        void playRestCompleteAlarm()
+      }
+
+      skipRestAlarmRef.current =
+        false
+    }
+
+    previousRestSecondsRef.current =
+      restSeconds
+  }, [restSeconds])
+
   if (
     !open ||
     !sessionId
@@ -275,6 +308,12 @@ export function ActiveWorkoutModal({
       ) {
         return
       }
+
+      /*
+       * Prime Web Audio while this is still inside
+       * the user's Complete Set interaction.
+       */
+      void unlockRestAlarm()
 
       try {
         const response =
@@ -694,11 +733,13 @@ export function ActiveWorkoutModal({
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        skipRestAlarmRef.current =
+                          true
                         setRestSeconds(
                           0,
                         )
-                      }
+                      }}
                       disabled={
                         restSeconds ===
                         0

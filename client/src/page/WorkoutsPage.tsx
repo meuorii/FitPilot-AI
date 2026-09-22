@@ -4,6 +4,7 @@ import {
 } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { WorkoutContent } from '../components/workout/WorkoutContent'
+import { unlockRestAlarm } from '../components/workout/restAlarm.utils'
 import { WorkoutErrorState } from '../components/workout/WorkoutErrorState'
 import { WorkoutHeader } from '../components/workout/WorkoutHeader'
 import { WorkoutSkeleton } from '../components/workout/WorkoutSkeleton'
@@ -211,6 +212,8 @@ export function WorkoutsPage() {
 
   const openActiveWorkout =
     () => {
+      void unlockRestAlarm()
+
       const sessionId =
         overview?.active_session
           ?.id ??
@@ -239,6 +242,8 @@ export function WorkoutsPage() {
   const handleStartWorkout =
     async () => {
       if (!overview) return
+
+      void unlockRestAlarm()
 
       if (
         overview.active_session
