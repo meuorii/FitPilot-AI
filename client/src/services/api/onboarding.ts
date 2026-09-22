@@ -1,6 +1,6 @@
 import type { CalculateGoalsRequest, CalculateGoalsResponse, CompleteOnboardingRequest, CompleteOnboardingResponse } from '../types/onboarding';
 
-export const BASE_URL = 'http://localhost:5000/api/v1';
+export const BASE_URL = 'https://fitpilot-api-rp3p.onrender.com/api/v1';
 
 export const calculateGoals = async (payload: CalculateGoalsRequest, token: string): Promise<CalculateGoalsResponse> => {
   const response = await fetch(`${BASE_URL}/profile/calculate-goals`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });

@@ -11,7 +11,7 @@ import type {
 } from '../types/settings';
 
 export const BASE_URL =
-  'http://localhost:5000/api/v1';
+  'https://fitpilot-api-rp3p.onrender.com/api/v1';
 
 const AUTH_TOKEN_KEY =
   'fitpilot_token';

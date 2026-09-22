@@ -1,6 +1,6 @@
 import type { AbandonWorkoutResponse, CompleteWorkoutInput, CompleteWorkoutResponse, CreateWorkoutExerciseInput, CreateWorkoutExerciseResponse, CreateWorkoutRoutineInput, CreateWorkoutSplitInput, DeleteWorkoutSetResponse, DuplicateWorkoutRoutineInput, DuplicateWorkoutSplitDayInput, DuplicateWorkoutSplitDayResponse, DuplicateWorkoutSplitInput, LogWorkoutSessionInput, LogWorkoutSessionResponse, LogWorkoutSetInput, LogWorkoutSetResponse, PreviousPerformanceResponse, RequiredWorkoutSessionResponse, StartWorkoutInput, UpdateWorkoutRoutineInput, UpdateWorkoutSetInput, UpdateWorkoutSetResponse, UpdateWorkoutSplitInput, WorkoutHistoryItemResponse, WorkoutHistoryQuery, WorkoutHistoryResponse, WorkoutMessageResponse, WorkoutOverviewResponse, WorkoutProgressResponse, WorkoutRoutineResponse, WorkoutRoutinesResponse, WorkoutSessionResponse, WorkoutSplitResponse, WorkoutSplitsResponse, WorkoutTodayResponse, WorkoutExercisesResponse } from '../types/workout'
 
-export const BASE_URL = 'http://localhost:5000/api/v1'
+export const BASE_URL = 'https://fitpilot-api-rp3p.onrender.com/api/v1'
 
 const AUTH_TOKEN_KEY = 'fitpilot_token'
 

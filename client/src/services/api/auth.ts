@@ -1,6 +1,6 @@
 import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, ResendVerificationRequest, ResendVerificationResponse, VerifyEmailRequest, VerifyEmailResponse } from '../types/auth';
 
-export const BASE_URL = 'http://localhost:5000/api/v1';
+export const BASE_URL = 'https://fitpilot-api-rp3p.onrender.com/api/v1';
 
 export const loginUser = async (credentials: LoginRequest): Promise<LoginResponse> => {
   const response = await fetch(`${BASE_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credentials) });
