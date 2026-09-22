@@ -1,5 +1,6 @@
 import type { CoachChatMessage } from '../../services/types/coach'
-import roccoCoach from '../../assets/images/rocco-coach-hero.png'
+import roccoCoachAvatar from '../../assets/images/rocco-coach-avatar.png'
+import { CoachFormattedMessage } from './CoachFormattedMessage'
 
 export interface CoachDisplayMessage
   extends CoachChatMessage {
@@ -25,7 +26,9 @@ const getInitials = (name: string) =>
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
+    .map((part) =>
+      part[0]?.toUpperCase(),
+    )
     .join('') || 'FP'
 
 export function CoachMessageBubble({
@@ -38,49 +41,62 @@ export function CoachMessageBubble({
   return (
     <article
       className={`flex items-end gap-2.5 ${
-        isUser ? 'justify-end' : 'justify-start'
+        isUser
+          ? 'justify-end'
+          : 'justify-start'
       }`}
     >
       {!isUser ? (
-        <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[#7482A4]/15 bg-[#F5F3F6]">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#7482A4]/20 bg-[#F5F3F6] shadow-sm">
           <img
-            src={roccoCoach}
-            alt=""
-            className="h-12 w-12 object-cover object-top"
+            src={roccoCoachAvatar}
+            alt="Rocco"
+            className="h-full w-full rounded-full object-cover object-center"
+            draggable={false}
           />
         </div>
       ) : null}
 
       <div
-        className={`max-w-[82%] sm:max-w-[72%] ${
-          isUser ? 'items-end' : 'items-start'
-        }`}
+        className={
+          isUser
+            ? 'max-w-[80%] sm:max-w-[70%]'
+            : 'max-w-[92%] sm:max-w-[86%]'
+        }
       >
         <div
           className={[
-            'rounded-[18px] px-4 py-3 text-[13px] leading-5 shadow-sm',
+            'rounded-[18px] px-4 py-3 shadow-sm',
             isUser
               ? 'rounded-br-md bg-[#7482A4]/13 text-[#38323F]'
               : 'rounded-bl-md border border-[#7482A4]/10 bg-[#FAF9FB] text-[#38323F]',
-            message.delivery === 'failed'
+            message.delivery ===
+            'failed'
               ? 'border border-[#B96F78]/35'
               : '',
           ].join(' ')}
         >
-          <p className="whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+          <CoachFormattedMessage
+            content={message.content}
+            isAssistant={!isUser}
+          />
         </div>
 
         <div
           className={`mt-1 flex items-center gap-2 px-1 ${
-            isUser ? 'justify-end' : 'justify-start'
+            isUser
+              ? 'justify-end'
+              : 'justify-start'
           }`}
         >
           <span className="text-[10px] font-medium text-[#9A949E]">
-            {formatTime(message.createdAt)}
+            {formatTime(
+              message.createdAt,
+            )}
           </span>
-          {message.delivery === 'failed' ? (
+
+          {message.delivery ===
+          'failed' ? (
             <span className="text-[10px] font-bold text-[#B96F78]">
               Not sent
             </span>

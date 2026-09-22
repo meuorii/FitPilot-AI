@@ -43,9 +43,9 @@ export function CoachChat({
   return (
     <section
       id="coach-chat"
-      className="flex h-[clamp(590px,70vh,760px)] min-h-[590px] flex-col rounded-[24px] border border-[#7482A4]/12 bg-white p-4 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-5"
+      className="flex h-[clamp(620px,72vh,780px)] min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#7482A4]/12 bg-white p-4 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-5"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#7482A4]/10 pb-4">
+      <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 border-b border-[#7482A4]/10 pb-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-[#7482A4]" />
           <h2 className="text-lg font-extrabold tracking-[-0.025em] text-[#38323F]">
@@ -58,12 +58,14 @@ export function CoachChat({
         </span>
       </div>
 
-      <div className="min-h-0 flex-1 py-3">
+      <div className="min-h-0 flex-1 overflow-hidden py-3">
         {messages.length === 0 && !isSending ? (
-          <CoachEmptyState
-            disabled={isSending}
-            onPrompt={onPrompt}
-          />
+          <div className="h-full overflow-y-auto">
+            <CoachEmptyState
+              disabled={isSending}
+              onPrompt={onPrompt}
+            />
+          </div>
         ) : (
           <CoachMessageList
             messages={messages}
@@ -77,12 +79,14 @@ export function CoachChat({
       {chatError ? (
         <div
           role="alert"
-          className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#B96F78]/20 bg-[#B96F78]/[0.06] px-3 py-2.5"
+          className="mb-3 shrink-0 flex flex-wrap items-center gap-2 rounded-xl border border-[#B96F78]/20 bg-[#B96F78]/[0.06] px-3 py-2.5"
         >
           <AlertCircle className="h-4 w-4 shrink-0 text-[#B96F78]" />
+
           <p className="min-w-0 flex-1 text-xs font-semibold text-[#8B555E]">
             {chatError}
           </p>
+
           {canRetry ? (
             <button
               type="button"
@@ -98,7 +102,7 @@ export function CoachChat({
       ) : null}
 
       {messages.length > 0 ? (
-        <div className="mb-3">
+        <div className="mb-3 shrink-0">
           <CoachQuickPrompts
             disabled={isSending}
             onPrompt={onPrompt}
@@ -106,13 +110,15 @@ export function CoachChat({
         </div>
       ) : null}
 
-      <CoachComposer
-        value={composerValue}
-        textareaRef={composerRef}
-        disabled={isSending}
-        onChange={onComposerChange}
-        onSend={onSendComposer}
-      />
+      <div className="shrink-0">
+        <CoachComposer
+          value={composerValue}
+          textareaRef={composerRef}
+          disabled={isSending}
+          onChange={onComposerChange}
+          onSend={onSendComposer}
+        />
+      </div>
     </section>
   )
 }
