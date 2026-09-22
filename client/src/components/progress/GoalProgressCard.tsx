@@ -1,5 +1,4 @@
 import {
-  Flag,
   Scale,
   Target,
   TrendingUp,

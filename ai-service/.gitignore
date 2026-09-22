@@ -1,34 +1,17 @@
-# Byte-compiled / Python Cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Environments (Virtual Envs)
-.env
-.env.local
-.env.*.local
+.venv/
 venv/
 env/
-ENV/
-env.bak/
-venv.bak/
 
-# IDE / Editor Settings
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.env
+.env.*
+
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Testing / Coverage Reports
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Logs & Databases
-*.log
-*.sqlite
-*.sqlite3
-
-# OS Specific
 .DS_Store
 Thumbs.db

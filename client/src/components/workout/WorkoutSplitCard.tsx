@@ -1,11 +1,18 @@
-import { CalendarDays, Dumbbell, Plus } from 'lucide-react'
+import {
+  CalendarDays,
+  Dumbbell,
+  ListPlus,
+  Plus,
+} from 'lucide-react'
 import type { WorkoutSplit } from '../../services/types/workout'
 
 interface WorkoutSplitCardProps {
   split: WorkoutSplit | null
   todayDayOfWeek: number
+  routinesCount: number
   onChangeSplit: () => void
   onCreateSplit: () => void
+  onCreateRoutine: () => void
 }
 
 const days = [
@@ -21,8 +28,10 @@ const days = [
 export function WorkoutSplitCard({
   split,
   todayDayOfWeek,
+  routinesCount,
   onChangeSplit,
   onCreateSplit,
+  onCreateRoutine,
 }: WorkoutSplitCardProps) {
   return (
     <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-6">
@@ -31,8 +40,11 @@ export function WorkoutSplitCard({
           <p className="text-lg font-extrabold tracking-[-0.02em] text-[#38323F]">
             My Workout Split
           </p>
-          <p className="mt-1 text-xs text-[#8B8690]">Your weekly training rhythm</p>
+          <p className="mt-1 text-xs text-[#8B8690]">
+            Your weekly training rhythm
+          </p>
         </div>
+
         {split ? (
           <button
             type="button"
@@ -55,7 +67,8 @@ export function WorkoutSplitCard({
                 {split.name}
               </p>
               <p className="mt-0.5 line-clamp-1 text-xs text-[#8B8690]">
-                {split.description || 'Your active weekly workout split.'}
+                {split.description ||
+                  'Your active weekly workout split.'}
               </p>
             </div>
           </div>
@@ -63,29 +76,46 @@ export function WorkoutSplitCard({
           <div className="mt-4 divide-y divide-[#F0EDF2]">
             {days.map((day) => {
               const splitDay = split.days.find(
-                (item) => item.day_of_week === day.index
+                (item) =>
+                  item.day_of_week === day.index,
               )
-              const isToday = day.index === todayDayOfWeek
-              const isRest = !splitDay || splitDay.is_rest_day || !splitDay.routine
+              const isToday =
+                day.index === todayDayOfWeek
+              const isRest =
+                !splitDay ||
+                splitDay.is_rest_day ||
+                !splitDay.routine
 
               return (
                 <div
                   key={day.index}
                   className="grid min-h-10 grid-cols-[42px_14px_1fr_auto] items-center gap-2 text-xs"
                 >
-                  <span className="font-bold text-[#5F5963]">{day.label}</span>
+                  <span className="font-bold text-[#5F5963]">
+                    {day.label}
+                  </span>
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
-                      isRest ? 'bg-[#C9C5CE]' : 'bg-[#7482A4]'
+                      isRest
+                        ? 'bg-[#C9C5CE]'
+                        : 'bg-[#7482A4]'
                     }`}
-                    aria-label={isRest ? 'Rest day' : 'Workout day'}
+                    aria-label={
+                      isRest
+                        ? 'Rest day'
+                        : 'Workout day'
+                    }
                   />
                   <span
                     className={`truncate font-semibold ${
-                      isRest ? 'text-[#AAA5AE]' : 'text-[#38323F]'
+                      isRest
+                        ? 'text-[#AAA5AE]'
+                        : 'text-[#38323F]'
                     }`}
                   >
-                    {isRest ? 'Rest' : splitDay.routine?.name}
+                    {isRest
+                      ? 'Rest'
+                      : splitDay.routine?.name}
                   </span>
                   {isToday ? (
                     <span className="rounded-full bg-[#7482A4] px-2.5 py-1 text-[10px] font-extrabold text-white">
@@ -104,19 +134,32 @@ export function WorkoutSplitCard({
             No workout split yet
           </p>
           <p className="mx-auto mt-1 max-w-xs text-xs leading-5 text-[#8B8690]">
-            Create a weekly split to assign routines to your training days.
+            {routinesCount > 0
+              ? 'Create a weekly split and assign your routines to training days.'
+              : 'Create a routine first, then organize it into your weekly split.'}
           </p>
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={onCreateSplit}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-[#CBD0DC] px-4 py-3 text-xs font-extrabold text-[#7482A4] transition hover:bg-[#F3F4F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
-      >
-        <Plus className="h-4 w-4" />
-        Create New Split
-      </button>
+      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={onCreateRoutine}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F2F3F7] px-4 py-3 text-xs font-extrabold text-[#667493] transition hover:bg-[#E9EBF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
+        >
+          <ListPlus className="h-4 w-4" />
+          Create Routine
+        </button>
+
+        <button
+          type="button"
+          onClick={onCreateSplit}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#CBD0DC] px-4 py-3 text-xs font-extrabold text-[#7482A4] transition hover:bg-[#F3F4F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
+        >
+          <Plus className="h-4 w-4" />
+          Create New Split
+        </button>
+      </div>
     </section>
   )
 }

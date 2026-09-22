@@ -1,4 +1,4 @@
-import type { DashboardResponse } from "../types/dashboard.types";
+import type { DashboardResponse } from "../services/types/dashboard";
 
 /** Development-only fixture matching the requested zero/empty dashboard state. */
 export const emptyDashboardFixture: DashboardResponse = {
