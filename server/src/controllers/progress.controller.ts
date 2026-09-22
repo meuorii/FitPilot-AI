@@ -6,12 +6,6 @@ const MAX_LOG_LIMIT = 100
 const DEFAULT_LOG_LIMIT = 25
 const TREND_DAYS = 90
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id?: string
-  }
-}
-
 interface ProgressLogRow {
   id: string
   user_id: string
@@ -48,8 +42,11 @@ interface ProgressGoalSummary {
 }
 
 const getUserId = (req: Request): string | null => {
-  const userId = (req as AuthenticatedRequest).user?.id
-  return typeof userId === 'string' && userId.trim() ? userId : null
+  const userId = req.user?.id
+
+  return typeof userId === 'string' && userId.trim()
+    ? userId
+    : null
 }
 
 const normalizeParam = (value: string | string[] | undefined): string | null => {
