@@ -301,6 +301,7 @@ export interface StartWorkoutInput {
   split_id?: WorkoutId;
   split_day_id?: WorkoutId;
   day_of_week?: number;
+  timezone?: string;
   workout_date?: string;
   notes?: string;
 }

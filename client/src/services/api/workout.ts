@@ -76,19 +76,44 @@ export const duplicateWorkoutSplitDay = async (splitId: string, dayId: string, i
 
 export const deleteWorkoutSplit = async (splitId: string): Promise<WorkoutMessageResponse> => request<WorkoutMessageResponse>(`/splits/${encodeURIComponent(splitId)}`, { method: 'DELETE' })
 
+const getClientTimezone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone
+  } catch {
+    return 'UTC'
+  }
+}
+
 export const getTodayWorkout = async (dayOfWeek?: number): Promise<WorkoutTodayResponse> => {
-  const query = toQueryString({ day_of_week: dayOfWeek })
+  const query = toQueryString({
+    day_of_week: dayOfWeek,
+    timezone: dayOfWeek === undefined ? getClientTimezone() : undefined,
+  })
   return request<WorkoutTodayResponse>(`/today${query}`)
 }
 
 export const getWorkoutOverview = async (dayOfWeek?: number): Promise<WorkoutOverviewResponse> => {
-  const query = toQueryString({ day_of_week: dayOfWeek })
+  const query = toQueryString({
+    day_of_week: dayOfWeek,
+    timezone: dayOfWeek === undefined ? getClientTimezone() : undefined,
+  })
   return request<WorkoutOverviewResponse>(`/overview${query}`)
 }
 
 export const getActiveWorkout = async (): Promise<WorkoutSessionResponse> => request<WorkoutSessionResponse>('/sessions/active')
 
-export const startWorkout = async (input: StartWorkoutInput = {}): Promise<RequiredWorkoutSessionResponse> => request<RequiredWorkoutSessionResponse>('/sessions/start', { method: 'POST', body: JSON.stringify(input) })
+export const startWorkout = async (
+  input: StartWorkoutInput = {},
+): Promise<RequiredWorkoutSessionResponse> => {
+  const body: StartWorkoutInput = {
+    ...input,
+    timezone: input.timezone ?? (input.day_of_week === undefined ? getClientTimezone() : undefined),
+  }
+  return request<RequiredWorkoutSessionResponse>('/sessions/start', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
 
 export const getWorkoutSession = async (sessionId: string): Promise<RequiredWorkoutSessionResponse> => request<RequiredWorkoutSessionResponse>(`/sessions/${encodeURIComponent(sessionId)}`)
 
