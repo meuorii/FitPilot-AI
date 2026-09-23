@@ -6,7 +6,7 @@ import { useOutletContext } from 'react-router-dom'
 
 import { SettingsContent } from '../components/settings/SettingsContent'
 import { SettingsErrorState } from '../components/settings/SettingsErrorState'
-import { SettingsHeader } from '../components/settings/SettingsHeader'
+import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { SettingsSkeleton } from '../components/settings/SettingsSkeleton'
 import {
   findSettingsSection,
@@ -66,6 +66,8 @@ export function SettingsPage() {
 
   const settings =
     settingsQuery.data?.data
+
+  const account = settings?.account ?? null
 
   const navigateToSection = (
     section: SettingsSectionId,
@@ -361,20 +363,16 @@ export function SettingsPage() {
   return (
     <>
       {settings ? (
-        <SettingsHeader
-          account={
-            settings.account
-          }
+        <PageHeader
+          title={`Manage your settings, ${getFirstName(account?.full_name)} 👋`}
+          subtitle="Update your profile, goals, preferences, and security."
+          fullName={account?.full_name}
+          avatarUrl={account?.avatar_url}
+          onOpenSidebar={openSidebar}
           search={search}
-          onSearchChange={
-            setSearch
-          }
-          onSearchSubmit={
-            handleSearch
-          }
-          onOpenSidebar={
-            openSidebar
-          }
+          onSearchChange={setSearch}
+          onSearchSubmit={handleSearch}
+          searchPlaceholder="Search settings..."
         />
       ) : (
         <div className="mb-5 flex items-center gap-3">

@@ -6,7 +6,7 @@ import { useOutletContext } from 'react-router-dom'
 import { WorkoutContent } from '../components/workout/WorkoutContent'
 import { unlockRestAlarm } from '../components/workout/restAlarm.utils'
 import { WorkoutErrorState } from '../components/workout/WorkoutErrorState'
-import { WorkoutHeader } from '../components/workout/WorkoutHeader'
+import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { WorkoutSkeleton } from '../components/workout/WorkoutSkeleton'
 import { ActiveWorkoutModal } from '../components/workout/modals/ActiveWorkoutModal'
 import { ChangeWorkoutSplitModal } from '../components/workout/modals/ChangeWorkoutSplitModal'
@@ -31,6 +31,7 @@ import type {
   WorkoutRoutineExercise,
 } from '../services/types/workout'
 import { useToastStore } from '../stores/toastStore'
+import { useDashboard } from '../hooks/useDashboard'
 
 export function WorkoutsPage() {
   const { openSidebar } =
@@ -89,6 +90,9 @@ export function WorkoutsPage() {
   const overviewQuery =
     useWorkoutOverview()
 
+  const dashboardQuery =
+    useDashboard()
+
   const exercisesQuery =
     useWorkoutExercises()
 
@@ -120,6 +124,8 @@ export function WorkoutsPage() {
   const overview =
     overviewQuery.data?.data
 
+  const dashboardUser =
+    dashboardQuery.data?.data.user
   /*
    * The full exercise library is intentionally kept in memory
    * and passed into the Today/Active Workout components.
@@ -449,14 +455,15 @@ export function WorkoutsPage() {
 
   return (
     <>
-      <WorkoutHeader
+      <PageHeader
+        title={`Ready to train, ${getFirstName(dashboardUser?.full_name)} 👋`}
+        subtitle="Track your split, routines, and today's workout."
+        fullName={dashboardUser?.full_name}
+        avatarUrl={dashboardUser?.avatar_url ?? null}
+        onOpenSidebar={openSidebar}
         search={search}
-        onSearchChange={
-          setSearch
-        }
-        onOpenSidebar={
-          openSidebar
-        }
+        onSearchChange={setSearch}
+        searchPlaceholder="Search workouts..."
       />
 
       <WorkoutContent

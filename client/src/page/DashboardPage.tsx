@@ -1,21 +1,25 @@
+import { useState } from 'react'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { useOutletContext } from 'react-router-dom'
 
 import { DashboardContent } from '../components/dashboard/DashboardContent'
-import { DashboardHeader } from '../components/dashboard/DashboardHeader'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
+import { PageHeader, getFirstName } from '../components/layout/PageHeader'
 import { useDashboard } from '../hooks/useDashboard'
 import type { DashboardLayoutContext } from '../layouts/MainDashboardLayout'
 
+const getGreeting = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export function DashboardPage() {
   const { openSidebar } = useOutletContext<DashboardLayoutContext>()
+  const [search, setSearch] = useState('')
 
-  const {
-    data: dashboard,
-    isLoading,
-    isError,
-    refetch,
-  } = useDashboard()
+  const { data: dashboard, isLoading, isError, refetch } = useDashboard()
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -28,15 +32,12 @@ export function DashboardPage() {
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F5F3F6] text-[#7482A4]">
             <AlertCircle className="h-6 w-6" />
           </div>
-
           <h1 className="mt-4 text-xl font-extrabold text-[#38323F]">
             Couldn&apos;t load your dashboard
           </h1>
-
           <p className="mt-2 text-sm leading-6 text-[#817B85]">
             Your data is safe. Check your connection or try the dashboard request again.
           </p>
-
           <button
             type="button"
             onClick={() => refetch()}
@@ -52,9 +53,15 @@ export function DashboardPage() {
 
   return (
     <>
-      <DashboardHeader
-        user={dashboard.data.user}
+      <PageHeader
+        title={`${getGreeting()}, ${getFirstName(dashboard.data.user.full_name)}`}
+        subtitle="Consistency today, stronger tomorrow."
+        fullName={dashboard.data.user.full_name}
+        avatarUrl={dashboard.data.user.avatar_url}
         onOpenSidebar={openSidebar}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search workouts, meals, or progress..."
       />
 
       <DashboardContent data={dashboard.data} />

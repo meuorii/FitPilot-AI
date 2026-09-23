@@ -5,8 +5,8 @@ import {
 import { useOutletContext } from 'react-router-dom'
 
 import { CoachContent } from '../components/coach/CoachContent'
-import { CoachHeader } from '../components/coach/CoachHeader'
 import type { CoachDisplayMessage } from '../components/coach/CoachMessageBubble'
+import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import {
   useCoachContext,
   useSendCoachMessage,
@@ -247,14 +247,17 @@ export function CoachPage() {
 
   return (
     <>
-      <CoachHeader
+      <PageHeader
+        title={`Talk with Rocco, ${getFirstName(fullName)} 👋`}
+        subtitle="Your AI fitness coach for workouts, meals, and daily guidance."
         fullName={fullName}
         avatarUrl={avatarUrl}
-        searchValue={headerQuestion}
-        isSending={sendMessageMutation.isPending}
+        onOpenSidebar={openSidebar}
+        search={headerQuestion}
         onSearchChange={setHeaderQuestion}
         onSearchSubmit={handleHeaderSubmit}
-        onOpenSidebar={openSidebar}
+        searchPlaceholder="Search workouts, meals, or ask Rocco..."
+        searchDisabled={sendMessageMutation.isPending}
       />
 
       <CoachContent

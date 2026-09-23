@@ -4,8 +4,8 @@ import {
 } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
+import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { ProgressContent } from '../components/progress/ProgressContent'
-import { ProgressHeader } from '../components/progress/ProgressHeader'
 import { ProgressSkeleton } from '../components/progress/ProgressSkeleton'
 import { searchProgressLogs } from '../components/progress/progress.utils'
 import { AllCheckInsModal } from '../components/progress/modals/AllCheckInsModal'
@@ -126,13 +126,19 @@ export function ProgressPage() {
     !recentLogsQuery.data &&
     recentLogsQuery.isLoading
 
+  const dashboardUser = dashboardQuery.data?.data.user
+
   return (
     <>
-      <ProgressHeader
-        user={dashboardQuery.data?.data.user}
+      <PageHeader
+        title={`Track your progress, ${getFirstName(dashboardUser?.full_name)} 👋`}
+        subtitle="Check in on your weight, trends, and milestones."
+        fullName={dashboardUser?.full_name}
+        avatarUrl={dashboardUser?.avatar_url}
+        onOpenSidebar={openSidebar}
         search={search}
         onSearchChange={setSearch}
-        onOpenSidebar={openSidebar}
+        searchPlaceholder="Search check-ins..."
       />
 
       {initialLoading ? (

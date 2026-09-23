@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
+import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { MealContent } from '../components/meal/MealContent'
 import { MealErrorState } from '../components/meal/MealErrorState'
-import { MealHeader } from '../components/meal/MealHeader'
 import { MealSkeleton } from '../components/meal/MealSkeleton'
 import { DeleteMealConfirmModal } from '../components/meal/modals/DeleteMealConfirmModal'
 import { ManualMealModal } from '../components/meal/modals/ManualMealModal'
@@ -68,11 +68,15 @@ export function MealsPage() {
 
   return (
     <>
-      <MealHeader
-        user={dashboard?.user}
+      <PageHeader
+        title={`Track your meals, ${getFirstName(dashboard?.user.full_name)} 👋`}
+        subtitle="Log meals, review macros, and stay on top of your nutrition."
+        fullName={dashboard?.user.full_name}
+        avatarUrl={dashboard?.user.avatar_url}
+        onOpenSidebar={openSidebar}
         search={search}
         onSearchChange={setSearch}
-        onOpenSidebar={openSidebar}
+        searchPlaceholder="Search meals..."
       />
 
       <MealContent
