@@ -13,6 +13,8 @@ const envSchema = z.object({
   HF_AI_SERVICE_URL: z.string().url('Invalid AI Service URL').default('http://localhost:8000'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   INTERNAL_API_KEY: z.string().default('fitpilot-secret-internal-key-2026'),
+  SMTP_USER: z.string().email('SMTP_USER must be a valid email address').optional(),
+  SMTP_PASSWORD: z.string().min(1, 'SMTP_PASSWORD is required').optional(),
 });
 
 export const env = envSchema.parse(process.env);

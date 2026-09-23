@@ -1,5 +1,6 @@
 import app from './app.js'
 import { env } from './config/env.js'
+import { verifyEmailTransport } from './services/email.service.js'
 
 const PORT = parseInt(env.PORT, 10)
 const HOST = '0.0.0.0'
@@ -48,6 +49,22 @@ const server = app.listen(
     } catch {
       console.log(
         `• AI Service: UNREACHABLE [${aiBaseUrl}]`,
+      )
+    }
+
+    try {
+      if (!env.SMTP_USER || !env.SMTP_PASSWORD) {
+        console.warn(
+          '• Email Service: NOT CONFIGURED (set SMTP_USER and SMTP_PASSWORD)',
+        )
+      } else {
+        await verifyEmailTransport()
+        console.log('• Email Service: ONLINE')
+      }
+    } catch (error) {
+      console.error(
+        '• Email Service: OFFLINE',
+        error instanceof Error ? error.message : error,
       )
     }
   },
