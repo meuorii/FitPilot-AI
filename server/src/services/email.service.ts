@@ -4,10 +4,6 @@ import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { env } from '../config/env.js';
 import { verificationEmailTemplate } from '../templates/VerificationEmail.template.js';
 
-// nodemailer's `lookup` option is a real, forwarded runtime option
-// (passed straight into Node's net.connect / dns.lookup), but it's
-// missing from @types/nodemailer in this project, so we extend the
-// type inline rather than relying on a type export that doesn't exist.
 type LookupFunction = (
   hostname: string,
   options: dns.LookupOneOptions,
@@ -22,15 +18,7 @@ type SMTPTransportOptionsWithLookup = SMTPTransport.Options & {
   lookup?: LookupFunction;
 };
 
-// Force DNS resolution to IPv4 only for SMTP connections.
-// Render has no outbound IPv6 route. Node 18.13+ uses Happy Eyeballs
-// (autoSelectFamily) by default, which still attempts IPv6 connections
-// even with dns.setDefaultResultOrder('ipv4first') set globally — that
-// setting only reorders results, it doesn't exclude IPv6. Passing a
-// custom `lookup` that only resolves the A record removes IPv6 from
-// the equation entirely, so there's nothing for autoSelectFamily to
-// race against.
-const ipv4OnlyLookup: LookupFunction = (hostname, options, callback) => {
+const ipv4OnlyLookup: LookupFunction = (hostname, _options, callback) => {
   dns.lookup(hostname, { family: 4 }, callback);
 };
 
