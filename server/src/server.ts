@@ -1,6 +1,14 @@
+import dns from 'node:dns'
 import app from './app.js'
 import { env } from './config/env.js'
 import { verifyEmailTransport } from './services/email.service.js'
+
+// Force IPv4-first DNS resolution process-wide.
+// Render (and some other hosts) don't support outbound IPv6, but Node's
+// default resolver order can still return/prefer AAAA records for
+// dual-stack hosts like smtp.gmail.com, causing ENETUNREACH in production
+// even though the same code works fine locally.
+dns.setDefaultResultOrder('ipv4first')
 
 const PORT = parseInt(env.PORT, 10)
 const HOST = '0.0.0.0'

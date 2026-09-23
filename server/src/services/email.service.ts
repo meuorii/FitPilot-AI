@@ -8,11 +8,10 @@ const getTransporter = () => {
     throw new Error('SMTP_USER and SMTP_PASSWORD are not configured.');
   }
 
-  const smtpConfig: SMTPTransport.Options & { family?: number } = {
+  const smtpConfig: SMTPTransport.Options = {
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    family: 4,
     auth: {
       user: env.SMTP_USER,
       pass: env.SMTP_PASSWORD,
