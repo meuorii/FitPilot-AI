@@ -23,6 +23,8 @@ interface TodayMealsListProps {
   meals: MealLog[]
   search: string
   sectionRef: RefObject<HTMLElement | null>
+  dateLabel?: string
+  isToday?: boolean
   onSelectMeal: (meal: MealLog) => void
   onDeleteMeal: (meal: MealLog) => void
   onParseAI: () => void
@@ -40,6 +42,8 @@ export function TodayMealsList({
   meals,
   search,
   sectionRef,
+  dateLabel = 'Today',
+  isToday = true,
   onSelectMeal,
   onDeleteMeal,
   onParseAI,
@@ -76,10 +80,10 @@ export function TodayMealsList({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-extrabold tracking-[-0.02em] text-[#38323F]">
-            Today&apos;s Meals
+            {isToday ? "Today's Meals" : `${dateLabel}'s Meals`}
           </h2>
           <p className="mt-1 text-xs text-[#8B8690]">
-            Review what you&apos;ve logged today.
+            {isToday ? 'Review what you\'ve logged today.' : 'Review what you\'ve logged on this date.'}
           </p>
         </div>
 
@@ -100,16 +104,17 @@ export function TodayMealsList({
 
       {meals.length === 0 ? (
         <div className="mt-5">
-          <MealEmptyState onParseAI={onParseAI} onLogManual={onLogManual} />
+          <MealEmptyState
+            dateLabel={dateLabel}
+            isToday={isToday}
+            onParseAI={onParseAI}
+            onLogManual={onLogManual}
+          />
         </div>
       ) : visibleMeals.length === 0 ? (
         <div className="mt-5 rounded-2xl border border-dashed border-[#7482A4]/20 bg-[#FAF9FB] px-5 py-10 text-center">
-          <p className="text-sm font-extrabold text-[#38323F]">
-            No matching meals
-          </p>
-          <p className="mt-1 text-xs text-[#8B8690]">
-            Try another search term.
-          </p>
+          <p className="text-sm font-extrabold text-[#38323F]">No matching meals</p>
+          <p className="mt-1 text-xs text-[#8B8690]">Try another search term.</p>
         </div>
       ) : (
         <div className="mt-5 space-y-2.5">
@@ -130,11 +135,7 @@ export function TodayMealsList({
                 }}
                 className="group grid cursor-pointer grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#7482A4]/10 bg-[#FCFBFD] p-3 transition hover:border-[#7482A4]/25 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4] lg:grid-cols-[52px_minmax(0,1fr)_72px_72px_72px_64px_36px_30px]"
               >
-                <MealImage
-                  src={getMealImageUrl(meal)}
-                  alt=""
-                  className="h-12 w-12 rounded-xl"
-                />
+                <MealImage src={getMealImageUrl(meal)} alt="" className="h-12 w-12 rounded-xl" />
 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

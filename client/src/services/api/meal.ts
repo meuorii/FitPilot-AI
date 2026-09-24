@@ -3,9 +3,15 @@ import type {
   LogMealInput,
   LogMealResponse,
   LogParsedMealInput,
+  MealHistoryQuery,
+  MealHistoryResponse,
+  MealsByDateResponse,
   ParseMealTextInput,
   ParseMealTextResponse,
   TodayMealsResponse,
+  WeeklyMealsQuery,
+  WeeklyMealsResponse,
+  YesterdayMealsResponse,
 } from '../types/meal';
 
 export const BASE_URL = 'https://fitpilot-api-rp3p.onrender.com/api/v1';
@@ -65,8 +71,21 @@ const request = async <T>(
   return result;
 };
 
+const toQueryString = (
+  params: Record<string, string | number | undefined>,
+): string => {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) searchParams.set(key, String(value));
+  });
+
+  const query = searchParams.toString();
+  return query ? `?${query}` : '';
+};
+
 // -----------------------------------------------------------------------------
-// AI meal parser
+// AI meal parser — POST /meals/parse-ai
 // -----------------------------------------------------------------------------
 
 export const parseMealText = async (
@@ -78,7 +97,12 @@ export const parseMealText = async (
   });
 
 // -----------------------------------------------------------------------------
-// Meal logging
+// Meal logging — POST /meals/log
+//
+// The backend accepts either a flat LogMealInput or a LogParsedMealInput
+// with a nested `data` object (the shape returned by parse-ai). The response
+// data is the raw inserted row (MealLogRecord), not the serialized shape
+// used by the date/week/history endpoints.
 // -----------------------------------------------------------------------------
 
 export const logMeal = async (
@@ -98,14 +122,38 @@ export const logParsedMeal = async (
   });
 
 // -----------------------------------------------------------------------------
-// Today's meals
+// Daily meal views — GET /meals/today | /meals/yesterday | /meals/date/:date
 // -----------------------------------------------------------------------------
 
 export const getTodayMeals = async (): Promise<TodayMealsResponse> =>
   request<TodayMealsResponse>('/today');
 
+export const getYesterdayMeals = async (): Promise<YesterdayMealsResponse> =>
+  request<YesterdayMealsResponse>('/yesterday');
+
+export const getMealsByDate = async (
+  date: string,
+): Promise<MealsByDateResponse> =>
+  request<MealsByDateResponse>(`/date/${encodeURIComponent(date)}`);
+
 // -----------------------------------------------------------------------------
-// Delete meal
+// Weekly + historical nutrition — GET /meals/week | /meals/history
+// -----------------------------------------------------------------------------
+
+export const getWeeklyMeals = async (
+  query: WeeklyMealsQuery = {},
+): Promise<WeeklyMealsResponse> =>
+  request<WeeklyMealsResponse>(`/week${toQueryString({ date: query.date })}`);
+
+export const getMealHistory = async (
+  query: MealHistoryQuery = {},
+): Promise<MealHistoryResponse> =>
+  request<MealHistoryResponse>(
+    `/history${toQueryString({ days: query.days })}`,
+  );
+
+// -----------------------------------------------------------------------------
+// Delete meal — DELETE /meals/:mealId
 // -----------------------------------------------------------------------------
 
 export const deleteMeal = async (

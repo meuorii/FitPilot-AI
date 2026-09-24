@@ -8,6 +8,7 @@ interface TodayIntakeCardProps {
   nutrition: MealNutritionView
   mealsCount: number
   dateLabel: string
+  isToday?: boolean
 }
 
 const configs = [
@@ -43,12 +44,13 @@ export function TodayIntakeCard({
   nutrition,
   mealsCount,
   dateLabel,
+  isToday = true,
 }: TodayIntakeCardProps) {
   return (
     <section className="rounded-[24px] border border-[#7482A4]/12 bg-white p-5 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-extrabold tracking-[-0.02em] text-[#38323F]">
-          Today&apos;s Intake
+          {isToday ? "Today's Intake" : 'Daily Intake'}
         </h2>
         <span className="text-[11px] font-semibold text-[#7482A4]">
           {dateLabel}
@@ -94,16 +96,19 @@ export function TodayIntakeCard({
         <div>
           <p className="text-sm font-extrabold text-[#38323F]">
             {mealsCount > 0
-              ? `${mealsCount} meal${mealsCount === 1 ? '' : 's'} logged today`
-              : 'No meals logged yet'}
+              ? `${mealsCount} meal${mealsCount === 1 ? '' : 's'} logged on ${dateLabel.toLowerCase()}`
+              : `No meals logged on ${dateLabel.toLowerCase()}`}
           </p>
           <p className="mt-0.5 text-xs text-[#8B8690]">
             {mealsCount > 0
-              ? 'Keep it up! Your daily totals are tracking.'
-              : 'Start by parsing or logging your first meal.'}
+              ? 'Your daily totals are tracking.'
+              : isToday
+                ? 'Start by parsing or logging your first meal.'
+                : 'Choose another date to review more meal logs.'}
           </p>
         </div>
       </div>
     </section>
   )
 }
+

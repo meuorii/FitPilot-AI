@@ -1,11 +1,15 @@
 import { Utensils } from 'lucide-react'
 
 interface MealEmptyStateProps {
+  dateLabel?: string
+  isToday?: boolean
   onParseAI: () => void
   onLogManual: () => void
 }
 
 export function MealEmptyState({
+  dateLabel = 'Today',
+  isToday = true,
   onParseAI,
   onLogManual,
 }: MealEmptyStateProps) {
@@ -15,26 +19,32 @@ export function MealEmptyState({
         <Utensils className="h-5 w-5" />
       </div>
       <h3 className="mt-3 text-sm font-extrabold text-[#38323F]">
-        No meals logged today
+        {isToday ? 'No meals logged today' : `No meals logged on ${dateLabel}`}
       </h3>
       <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[#8B8690]">
-        Start by describing a meal with AI or add one manually.
+        {isToday
+          ? 'Start by describing a meal with AI or add one manually.'
+          : 'This date has no saved meal logs.'}
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={onParseAI}
-          className="rounded-xl bg-[#7482A4] px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-[#657493] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
-        >
-          Parse with AI
-        </button>
-        <button
-          type="button"
-          onClick={onLogManual}
-          className="rounded-xl border border-[#7482A4]/20 bg-white px-4 py-2.5 text-xs font-extrabold text-[#5F6E91] transition hover:bg-[#F5F3F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
-        >
-          Log Manually
-        </button>
+        {isToday ? (
+          <>
+            <button
+              type="button"
+              onClick={onParseAI}
+              className="rounded-xl bg-[#7482A4] px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-[#657493] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
+            >
+              Parse with AI
+            </button>
+            <button
+              type="button"
+              onClick={onLogManual}
+              className="rounded-xl border border-[#7482A4]/20 bg-white px-4 py-2.5 text-xs font-extrabold text-[#5F6E91] transition hover:bg-[#F5F3F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4]"
+            >
+              Log Manually
+            </button>
+          </>
+        ) : null}
       </div>
     </div>
   )

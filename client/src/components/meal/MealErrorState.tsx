@@ -3,11 +3,13 @@ import { AlertCircle, RefreshCw } from 'lucide-react'
 interface MealErrorStateProps {
   onRetry: () => void
   isRetrying?: boolean
+  dateLabel?: string
 }
 
 export function MealErrorState({
   onRetry,
   isRetrying = false,
+  dateLabel = 'selected date',
 }: MealErrorStateProps) {
   return (
     <div className="grid min-h-[60vh] place-items-center">
@@ -19,7 +21,7 @@ export function MealErrorState({
           Meals could not be loaded
         </h1>
         <p className="mt-2 text-sm leading-6 text-[#77727B]">
-          FitPilot couldn&apos;t retrieve today&apos;s meal logs. Your data has not been changed.
+          FitPilot couldn&apos;t retrieve meal logs for {dateLabel}. Your data has not been changed.
         </p>
         <button
           type="button"

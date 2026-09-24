@@ -1,5 +1,5 @@
 import { useEffect, type MouseEvent } from 'react'
-import { X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 
 import type { MealLog } from '../../../services/types/meal'
 import {
@@ -13,9 +13,10 @@ import {
 interface MealDetailsModalProps {
   meal: MealLog | null
   onClose: () => void
+  onDelete?: (meal: MealLog) => void
 }
 
-export function MealDetailsModal({ meal, onClose }: MealDetailsModalProps) {
+export function MealDetailsModal({ meal, onClose, onDelete }: MealDetailsModalProps) {
   useEffect(() => {
     if (!meal) return
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -26,6 +27,12 @@ export function MealDetailsModal({ meal, onClose }: MealDetailsModalProps) {
   }, [meal, onClose])
 
   if (!meal) return null
+
+  const handleDelete = () => {
+    if (!onDelete) return
+    onClose()
+    onDelete(meal)
+  }
 
   return (
     <div
@@ -67,12 +74,8 @@ export function MealDetailsModal({ meal, onClose }: MealDetailsModalProps) {
 
         {meal.raw_input_prompt?.trim() ? (
           <div className="mt-5 rounded-2xl bg-[#F8F7FA] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#8B8690]">
-              Original input
-            </p>
-            <p className="mt-1 text-sm leading-6 text-[#38323F]">
-              {meal.raw_input_prompt}
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#8B8690]">Original input</p>
+            <p className="mt-1 text-sm leading-6 text-[#38323F]">{meal.raw_input_prompt}</p>
           </div>
         ) : null}
 
@@ -98,13 +101,9 @@ export function MealDetailsModal({ meal, onClose }: MealDetailsModalProps) {
                 <div key={`${getFoodName(food)}-${index}`} className="px-4 py-3">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-extrabold text-[#38323F]">
-                        {getFoodName(food)}
-                      </p>
+                      <p className="text-xs font-extrabold text-[#38323F]">{getFoodName(food)}</p>
                       {getFoodServing(food) ? (
-                        <p className="mt-0.5 text-[10px] text-[#8B8690]">
-                          {getFoodServing(food)}
-                        </p>
+                        <p className="mt-0.5 text-[10px] text-[#8B8690]">{getFoodServing(food)}</p>
                       ) : null}
                     </div>
                     <p className="shrink-0 text-xs font-bold text-[#7482A4]">
@@ -112,13 +111,24 @@ export function MealDetailsModal({ meal, onClose }: MealDetailsModalProps) {
                     </p>
                   </div>
                   <p className="mt-2 text-[10px] text-[#8B8690]">
-                    {formatMacroNumber(Number(food.protein) || 0)}g protein ·{' '}
-                    {formatMacroNumber(Number(food.carbs) || 0)}g carbs ·{' '}
-                    {formatMacroNumber(Number(food.fat) || 0)}g fat
+                    {formatMacroNumber(Number(food.protein) || 0)}g protein · {formatMacroNumber(Number(food.carbs) || 0)}g carbs · {formatMacroNumber(Number(food.fat) || 0)}g fat
                   </p>
                 </div>
               ))}
             </div>
+          </div>
+        ) : null}
+
+        {onDelete ? (
+          <div className="mt-5 flex justify-end border-t border-[#7482A4]/10 pt-4">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#B96F78]/20 bg-[#B96F78]/5 px-4 py-2.5 text-xs font-extrabold text-[#B96F78] transition hover:bg-[#B96F78]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B96F78]"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete Meal
+            </button>
           </div>
         ) : null}
       </section>

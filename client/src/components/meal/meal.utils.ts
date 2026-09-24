@@ -2,6 +2,9 @@ import type { DashboardNutrition } from '../../services/types/dashboard'
 import type {
   MealFoodItem,
   MealLog,
+  MealLogSummary,
+  MealNutritionTotals,
+  MealTargets,
   ParsedMealData,
   TodayMealSummary,
 } from '../../services/types/meal'
@@ -45,6 +48,7 @@ export const clampPercentage = (consumed: number, target: number): number => {
 export const buildNutritionView = (
   summary: TodayMealSummary,
   dashboardNutrition?: DashboardNutrition,
+  mealTargets?: MealTargets,
 ): MealNutritionView => {
   const buildMetric = (
     key: NutritionKey,
@@ -65,33 +69,46 @@ export const buildNutritionView = (
     calories: buildMetric(
       'calories',
       'Calories',
-      summary.total_calories,
-      dashboardNutrition?.calories.target ?? 0,
+      summary.calories,
+      mealTargets?.daily_calories ?? dashboardNutrition?.calories.target ?? 0,
       'kcal',
     ),
     protein: buildMetric(
       'protein',
       'Protein',
-      summary.total_protein,
-      dashboardNutrition?.protein.target ?? 0,
+      summary.protein,
+      mealTargets?.protein_grams ?? dashboardNutrition?.protein.target ?? 0,
       'g',
     ),
     carbs: buildMetric(
       'carbs',
       'Carbs',
-      summary.total_carbs,
-      dashboardNutrition?.carbs.target ?? 0,
+      summary.carbs,
+      mealTargets?.carbs_grams ?? dashboardNutrition?.carbs.target ?? 0,
       'g',
     ),
     fat: buildMetric(
       'fat',
       'Fat',
-      summary.total_fat,
-      dashboardNutrition?.fat.target ?? 0,
+      summary.fat,
+      mealTargets?.fat_grams ?? dashboardNutrition?.fat.target ?? 0,
       'g',
     ),
   }
 }
+
+export const normalizeMealLog = (meal: MealLogSummary): MealLog => ({
+  id: meal.id,
+  meal_type: meal.meal_type,
+  raw_input_prompt: meal.raw_input_prompt,
+  total_calories: safeNumber(meal.calories),
+  total_protein: safeNumber(meal.protein),
+  total_carbs: safeNumber(meal.carbs),
+  total_fat: safeNumber(meal.fat),
+  food_items: Array.isArray(meal.food_items) ? meal.food_items : [],
+  logged_at: meal.logged_at ?? '',
+  created_at: meal.created_at,
+})
 
 export const getFoodName = (item: MealFoodItem): string => {
   const value = item.name ?? item.food_name
@@ -180,6 +197,7 @@ export const formatMacroNumber = (value: number): string => {
 }
 
 export const formatMealTime = (value: string): string => {
+  if (!value) return 'Time unavailable'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Time unavailable'
 
@@ -197,9 +215,63 @@ export const formatMealDate = (value: Date = new Date()): string =>
     year: 'numeric',
   }).format(value)
 
+export const formatMealDateKey = (value: string): string => {
+  const [year, month, day] = value.split('-').map(Number)
+  if (!year || !month || !day) return value
+
+  return formatMealDate(new Date(year, month - 1, day))
+}
+
+export const getLocalDateKey = (value: Date = new Date()): string => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export const shiftDateKey = (date: string, days: number): string => {
+  const [year, month, day] = date.split('-').map(Number)
+  const value = new Date(year, month - 1, day)
+  value.setDate(value.getDate() + days)
+  return getLocalDateKey(value)
+}
+
+export const isSameDateKey = (a: string, b: string): boolean => a === b
+
+export const formatDateRange = (start: string, end: string): string => {
+  const startDate = new Date(`${start}T00:00:00`)
+  const endDate = new Date(`${end}T00:00:00`)
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    Number.isNaN(endDate.getTime())
+  ) {
+    return `${start} – ${end}`
+  }
+
+  const format = (date: Date) =>
+    new Intl.DateTimeFormat(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date)
+
+  return `${format(startDate)} – ${format(endDate)}`
+}
+
 export const getDefaultMealType = (hour = new Date().getHours()) => {
   if (hour < 10) return 'breakfast' as const
   if (hour < 15) return 'lunch' as const
   if (hour < 20) return 'dinner' as const
   return 'snack' as const
 }
+
+export const getMealNutritionTotals = (meals: MealLog[]): MealNutritionTotals =>
+  meals.reduce<MealNutritionTotals>(
+    (totals, meal) => ({
+      calories: totals.calories + safeNumber(meal.total_calories),
+      protein: totals.protein + safeNumber(meal.total_protein),
+      carbs: totals.carbs + safeNumber(meal.total_carbs),
+      fat: totals.fat + safeNumber(meal.total_fat),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  )

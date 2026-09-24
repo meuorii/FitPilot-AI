@@ -6,6 +6,7 @@ import { formatMacroNumber } from './meal.utils'
 interface NutritionSummaryProps {
   nutrition: MealNutritionView
   mealsCount: number
+  dateLabel?: string
 }
 
 const configs = [
@@ -18,15 +19,16 @@ const configs = [
 export function NutritionSummary({
   nutrition,
   mealsCount,
+  dateLabel = 'Today',
 }: NutritionSummaryProps) {
   return (
     <section className="rounded-[24px] border border-[#7482A4]/12 bg-white p-5 shadow-[0_8px_28px_rgba(56,50,63,0.045)] sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-extrabold tracking-[-0.02em] text-[#38323F]">
-          Today&apos;s Nutrition Summary
+          {dateLabel === 'Today' ? "Today's Nutrition Summary" : `${dateLabel} Nutrition Summary`}
         </h2>
         <span className="text-xs font-semibold text-[#7482A4]">
-          {mealsCount} meal{mealsCount === 1 ? '' : 's'} logged today
+          {mealsCount} meal{mealsCount === 1 ? '' : 's'} logged on {dateLabel.toLowerCase()}
         </span>
       </div>
 
@@ -76,3 +78,4 @@ export function NutritionSummary({
     </section>
   )
 }
+

@@ -88,7 +88,7 @@ export function DeleteMealConfirmModal({
         </h2>
         <p className="mt-2 text-sm leading-6 text-[#77727B]">
           <span className="font-semibold text-[#38323F]">{getMealTitle(meal)}</span>{' '}
-          will be removed from today&apos;s nutrition totals.
+          will be removed from your meal history and nutrition totals.
         </p>
 
         <div className="mt-6 flex justify-end gap-2">
@@ -118,3 +118,4 @@ export function DeleteMealConfirmModal({
     </div>
   )
 }
+
