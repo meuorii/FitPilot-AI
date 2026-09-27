@@ -43,7 +43,10 @@ export function DailyNutritionOverview({
       <div className="mt-6 rounded-2xl bg-[#F7F6F8] p-4 sm:p-5">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-bold text-[#8B8690]">Calories</p>
+            <div className="flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-[#7482A4]" />
+              <p className="text-[11px] font-bold text-[#8B8690]">Calories</p>
+            </div>
             <p className="mt-1 text-3xl font-extrabold tracking-[-0.04em] text-[#38323F]">
               {Math.round(calorie.consumed).toLocaleString()}
               <span className="ml-1 text-sm font-bold text-[#8B8690]">
