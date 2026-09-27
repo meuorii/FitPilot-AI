@@ -3,7 +3,6 @@ import { useOutletContext } from 'react-router-dom'
 
 import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { MealContent } from '../components/meal/MealContent'
-import { MealDateNavigator } from '../components/meal/MealDateNavigator'
 import { MealErrorState } from '../components/meal/MealErrorState'
 import { MealHistoryPanel } from '../components/meal/MealHistoryPanel'
 import { MealSkeleton } from '../components/meal/MealSkeleton'
@@ -128,17 +127,14 @@ export function MealsPage() {
         searchPlaceholder="Search meals..."
       />
 
-      <MealDateNavigator
-        value={selectedDate}
-        onChange={handleDateChange}
-        onViewHistory={viewHistory}
-      />
-
       <MealContent
         meals={meals}
         summary={summary}
         targets={targets}
         dashboardNutrition={dashboard?.today.nutrition}
+        week={weeklyQuery.data?.data}
+        history={historyQuery.data?.data}
+        onDateChange={handleDateChange}
         date={selectedDate}
         isToday={isToday}
         search={search}
@@ -159,6 +155,8 @@ export function MealsPage() {
         isHistoryLoading={historyQuery.isLoading}
         weekError={weeklyQuery.isError}
         historyError={historyQuery.isError}
+        selectedDate={selectedDate}
+        onSelectDate={handleDateChange}
         sectionRef={historySectionRef}
       />
 

@@ -9,7 +9,7 @@ interface MealHeroProps {
 
 export function MealHero({ onParseAI }: MealHeroProps) {
   return (
-    <section className="relative min-h-[226px] overflow-hidden rounded-[24px] bg-gradient-to-br from-[#7482A4] via-[#697896] to-[#596681] p-6 text-white shadow-[0_10px_30px_rgba(56,50,63,0.08)] sm:p-8">
+    <section className="relative h-full min-h-0 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#7482A4] via-[#697896] to-[#596681] p-6 text-white shadow-[0_10px_30px_rgba(56,50,63,0.08)] sm:p-8">
       <div className="pointer-events-none absolute -left-12 top-16 h-40 w-40 rounded-full bg-white/5 blur-2xl" />
       <div className="pointer-events-none absolute right-[28%] top-4 h-44 w-44 rounded-full bg-white/8 blur-2xl" />
 

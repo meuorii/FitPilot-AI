@@ -57,7 +57,7 @@ export function TodayIntakeCard({
         </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-2 2xl:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {configs.map(({ key, icon: Icon }) => {
           const metric = nutrition[key]
           const display =
