@@ -3,6 +3,7 @@ import multer from 'multer';
 import {
   getExercises,
   createExercise,
+  updateExercise,
   getPreviousPerformance,
   getRoutines,
   getRoutine,
@@ -51,6 +52,7 @@ router.use(authenticateUser);
 
 // Exercise library + custom exercise creation
 router.route('/exercises').get(getExercises).post(upload.single('image'), createExercise);
+router.patch('/exercises/:exerciseId', upload.single('image'), updateExercise);
 router.get('/exercises/:exerciseId/previous-performance', getPreviousPerformance);
 
 // Custom routines

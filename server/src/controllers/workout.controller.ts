@@ -646,6 +646,160 @@ export const createExercise = async (req: Request, res: Response): Promise<void>
   }
 };
 
+const EXERCISE_IMAGE_BUCKET = 'exercise-images';
+
+const getStoragePathFromPublicUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  const marker = `/${EXERCISE_IMAGE_BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  const path = decodeURIComponent(url.slice(index + marker.length).split('?')[0] ?? '');
+  return path || null;
+};
+
+export const updateExercise = async (req: Request, res: Response): Promise<void> => {
+  let newFilePath: string | null = null;
+
+  try {
+    const userId = getUserId(req);
+    if (!userId) { sendUnauthorized(res); return; }
+
+    const exerciseId = Array.isArray(req.params.exerciseId) ? req.params.exerciseId[0] : req.params.exerciseId;
+    if (!exerciseId) {
+      res.status(400).json({ success: false, message: 'Exercise ID is required.' });
+      return;
+    }
+
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('exercises')
+      .select('id, image_url')
+      .eq('id', exerciseId)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+    if (!existing) {
+      res.status(404).json({ success: false, message: 'Exercise not found.' });
+      return;
+    }
+
+    // multipart/form-data fields are all strings, and every field is optional (PATCH).
+    const { name, category, equipment, difficulty, instructions, remove_image } = req.body ?? {};
+    const updatePayload: Record<string, unknown> = {};
+
+    if (name !== undefined) {
+      const cleanName = String(name).trim();
+      if (!cleanName) {
+        res.status(400).json({ success: false, message: 'Name cannot be empty.' });
+        return;
+      }
+      updatePayload.name = cleanName;
+    }
+
+    if (category !== undefined) {
+      const cleanCategory = String(category).trim();
+      if (!cleanCategory) {
+        res.status(400).json({ success: false, message: 'Category cannot be empty.' });
+        return;
+      }
+      updatePayload.category = cleanCategory;
+    }
+
+    if (equipment !== undefined) {
+      const cleanEquipment = String(equipment).trim();
+      if (!cleanEquipment) {
+        res.status(400).json({ success: false, message: 'Equipment cannot be empty.' });
+        return;
+      }
+      updatePayload.equipment = cleanEquipment;
+    }
+
+    if (difficulty !== undefined) {
+      updatePayload.difficulty = String(difficulty).trim() || 'beginner';
+    }
+
+    if (instructions !== undefined) {
+      try {
+        const parsed = typeof instructions === 'string' ? JSON.parse(instructions) : instructions;
+        if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string')) {
+          res.status(400).json({ success: false, message: 'Instructions must be an array of strings.' });
+          return;
+        }
+        updatePayload.instructions = parsed;
+      } catch {
+        res.status(400).json({ success: false, message: 'Instructions must be a valid JSON array.' });
+        return;
+      }
+    }
+
+    // Image handling: new file replaces the old one; remove_image=true sets image_url to null.
+    const shouldRemoveImage = String(remove_image ?? '').toLowerCase() === 'true';
+
+    if (req.file) {
+      const ext = req.file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+      newFilePath = `exercises/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from(EXERCISE_IMAGE_BUCKET)
+        .upload(newFilePath, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
+
+      if (uploadError) throw uploadError;
+      updatePayload.image_url = supabaseAdmin.storage.from(EXERCISE_IMAGE_BUCKET).getPublicUrl(newFilePath).data.publicUrl;
+    } else if (shouldRemoveImage) {
+      updatePayload.image_url = null;
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      res.status(400).json({ success: false, message: 'No fields to update.' });
+      return;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('exercises')
+      .update(updatePayload)
+      .eq('id', exerciseId)
+      .select('id, name, category, equipment, difficulty, instructions, image_url, created_at')
+      .single();
+
+    if (error) {
+      // DB update failed, so don't leave the newly uploaded file orphaned.
+      if (newFilePath) await supabaseAdmin.storage.from(EXERCISE_IMAGE_BUCKET).remove([newFilePath]);
+      newFilePath = null;
+      if (error.code === '23505') {
+        res.status(409).json({ success: false, message: 'An exercise with this name already exists.' });
+        return;
+      }
+      throw error;
+    }
+
+    // DB update succeeded, so the old image (if replaced or removed) can be deleted from the bucket.
+    if ('image_url' in updatePayload) {
+      const oldImageUrl = existing.image_url;
+
+      if (typeof oldImageUrl === 'string' && oldImageUrl.length > 0) {
+        const oldPath = getStoragePathFromPublicUrl(oldImageUrl);
+
+        if (oldPath) {
+          const { error: removeError } = await supabaseAdmin.storage
+            .from(EXERCISE_IMAGE_BUCKET)
+            .remove([oldPath]);
+
+          if (removeError) {
+            console.error(
+              'updateExercise old image cleanup failed:',
+              removeError
+            );
+          }
+        }
+      }
+    }
+
+    res.status(200).json({ success: true, message: 'Exercise updated successfully.', data });
+  } catch (error) {
+    if (newFilePath) await supabaseAdmin.storage.from(EXERCISE_IMAGE_BUCKET).remove([newFilePath]);
+    console.error('updateExercise error:', error);
+    res.status(500).json({ success: false, message: errorMessage(error, 'Failed to update exercise.') });
+  }
+};
+
 export const getPreviousPerformance = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = getUserId(req);
