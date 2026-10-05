@@ -18,6 +18,7 @@ import {
   useAbandonWorkout,
   useCompleteWorkout,
   useLogWorkoutSet,
+  usePreviousPerformance,
   useWorkoutSession,
 } from '../../../hooks/useWorkout'
 import type { WorkoutExercise } from '../../../services/types/workout'
@@ -133,29 +134,60 @@ export function ActiveWorkoutModal({
       currentExercise,
     )
 
+  /*
+   * Fetch the latest completed performance
+   * for the current exercise.
+   *
+   * The active session is excluded so we don't
+   * accidentally use sets from the workout
+   * currently being performed.
+   */
+  const previousPerformanceQuery =
+    usePreviousPerformance(
+      open && current
+        ? current.exercise_id
+        : null,
+      open
+        ? sessionId
+        : null,
+    )
+
+  const previousPerformance =
+    previousPerformanceQuery
+      .data?.data ?? null
+
+  /*
+   * Match the previous session's set number
+   * with the set the user is currently entering.
+   *
+   * Example:
+   * Current Set 1 -> Previous Set 1
+   * Current Set 2 -> Previous Set 2
+   * Current Set 3 -> Previous Set 3
+   */
   const previousSet =
     useMemo(() => {
       if (
-        !session ||
+        !previousPerformance ||
         !current
       ) {
         return null
       }
 
+      const setNumber =
+        current.next_set_number ?? 1
+
       return (
-        session.sets
-          .filter(
-            (set) =>
-              set.exercise_id ===
-              current.exercise_id,
-          )
-          .sort(
-            (a, b) =>
-              b.set_number -
-              a.set_number,
-          )[0] ?? null
+        previousPerformance.sets.find(
+          (set) =>
+            set.set_number ===
+            setNumber,
+        ) ?? null
       )
-    }, [session, current])
+    }, [
+      previousPerformance,
+      current?.next_set_number,
+    ])
 
   useEffect(() => {
     if (!open) return
@@ -196,6 +228,14 @@ export function ActiveWorkoutModal({
     onClose,
   ])
 
+  /*
+   * Prefill the current set from the
+   * previous completed workout session.
+   *
+   * If no previous set exists:
+   * - weight stays empty
+   * - reps defaults to the target minimum
+   */
   useEffect(() => {
     if (!current) {
       setWeight('')
@@ -212,12 +252,17 @@ export function ActiveWorkoutModal({
     )
 
     setReps(
-      String(
-        current.target_reps_min,
-      ),
+      previousSet
+        ? String(
+            previousSet.reps,
+          )
+        : String(
+            current.target_reps_min,
+          ),
     )
   }, [
     current?.exercise_id,
+    current?.next_set_number,
     previousSet?.id,
   ])
 
@@ -608,6 +653,7 @@ export function ActiveWorkoutModal({
                                       {index +
                                         1}
                                     </span>
+
                                     <span>
                                       {
                                         instruction
@@ -639,7 +685,74 @@ export function ActiveWorkoutModal({
                       </div>
                     </div>
 
-                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    {previousPerformance ? (
+                      <div className="mt-6 rounded-2xl border border-[#7482A4]/15 bg-[#F5F6F9] p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7482A4]">
+                              Last Session
+                            </p>
+
+                            <p className="mt-1 text-sm font-extrabold text-[#38323F]">
+                              {previousSet ? (
+                                <>
+                                  {
+                                    previousSet.weight_kg
+                                  }{' '}
+                                  kg ×{' '}
+                                  {
+                                    previousSet.reps
+                                  }{' '}
+                                  reps
+                                </>
+                              ) : (
+                                'No matching set'
+                              )}
+                            </p>
+                          </div>
+
+                          <p className="text-[10px] font-semibold text-[#8B8690]">
+                            Set{' '}
+                            {nextSetNumber ??
+                              1}
+                          </p>
+                        </div>
+
+                        {previousPerformance
+                          .session
+                          .workout_date ? (
+                          <p className="mt-1 text-[11px] text-[#8B8690]">
+                            {new Date(
+                              previousPerformance
+                                .session
+                                .workout_date,
+                            ).toLocaleDateString(
+                              undefined,
+                              {
+                                month:
+                                  'short',
+                                day:
+                                  'numeric',
+                                year:
+                                  'numeric',
+                              },
+                            )}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : previousPerformanceQuery.isLoading ? (
+                      <div className="mt-6 rounded-2xl border border-[#EAE7EC] bg-[#FAF9FB] p-4">
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7482A4]">
+                          Last Session
+                        </p>
+
+                        <p className="mt-1 text-xs text-[#8B8690]">
+                          Loading previous performance...
+                        </p>
+                      </div>
+                    ) : null}
+
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       <label className="rounded-2xl border border-[#EAE7EC] p-4">
                         <span className="text-xs font-bold text-[#817B85]">
                           Weight (kg)
@@ -699,6 +812,7 @@ export function ActiveWorkoutModal({
                       className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#7482A4] px-5 text-sm font-extrabold text-white transition hover:bg-[#667493] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Check className="h-5 w-5" />
+
                       {logSet.isPending
                         ? 'Saving Set...'
                         : 'Complete Set'}
@@ -719,6 +833,7 @@ export function ActiveWorkoutModal({
                 <div className="rounded-[24px] border border-[#EAE7EC] bg-white p-5">
                   <div className="flex items-center gap-2 text-[#7482A4]">
                     <TimerReset className="h-5 w-5" />
+
                     <span className="text-xs font-bold">
                       Rest Timer
                     </span>
@@ -815,6 +930,7 @@ export function ActiveWorkoutModal({
                             .planned_exercises
                         }
                       </p>
+
                       <p className="mt-1 text-[10px] text-[#8B8690]">
                         exercises
                       </p>
@@ -832,6 +948,7 @@ export function ActiveWorkoutModal({
                             .planned_sets
                         }
                       </p>
+
                       <p className="mt-1 text-[10px] text-[#8B8690]">
                         sets
                       </p>
@@ -842,6 +959,7 @@ export function ActiveWorkoutModal({
                         {session.total_volume_kg.toLocaleString()}{' '}
                         kg
                       </p>
+
                       <p className="mt-1 text-[10px] text-[#8B8690]">
                         volume
                       </p>
