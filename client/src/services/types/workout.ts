@@ -385,9 +385,12 @@ export interface LogWorkoutSessionData {
 }
 
 export interface WorkoutHistoryExercise {
-  id: WorkoutId;
-  name: string;
-  category: string;
+  id: WorkoutId
+  name: string
+  category: string
+  equipment?: string
+  difficulty?: string
+  image_url?: string | null
 }
 
 export interface WorkoutHistorySet {

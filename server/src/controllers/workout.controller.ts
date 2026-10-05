@@ -2200,39 +2200,20 @@ export const logWorkoutSession = async (req: Request, res: Response): Promise<vo
 export const getWorkoutHistory = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = getUserId(req);
-    if (!userId) { sendUnauthorized(res); return; }
-
+    if (!userId) return sendUnauthorized(res);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20) || 20));
     const offset = Math.max(0, Number(req.query.offset ?? 0) || 0);
-
     let query = supabaseAdmin
       .from('workout_sessions')
-      .select(`
-        id,
-        routine_id,
-        split_id,
-        split_day_id,
-        workout_date,
-        notes,
-        total_volume_kg,
-        status,
-        started_at,
-        completed_at,
-        created_at,
-        workout_routines (id, name),
-        workout_sets (id, exercise_id, set_number, weight_kg, reps, set_type, is_completed, completed_at, exercises(id, name, category))
-      `)
+      .select('id, routine_id, split_id, split_day_id, workout_date, notes, total_volume_kg, status, started_at, completed_at, created_at, workout_routines ( id, name ), workout_sets ( id, exercise_id, set_number, weight_kg, reps, set_type, is_completed, completed_at, exercises ( id, name, category, equipment, difficulty, image_url ) )')
       .eq('user_id', userId)
       .order('workout_date', { ascending: false })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
-
     const requestedStatus = String(req.query.status || 'completed').trim();
     if (requestedStatus !== 'all') query = query.eq('status', requestedStatus);
-
     const { data, error } = await query;
     if (error) throw error;
-
     res.status(200).json({ success: true, data: data ?? [], pagination: { limit, offset } });
   } catch (error) {
     console.error('getWorkoutHistory error:', error);
