@@ -2,6 +2,7 @@ import type {
   WorkoutExercise,
   WorkoutHistoryItem,
   WorkoutOverviewData,
+  WorkoutRoutine,
   WorkoutRoutineExercise,
   WorkoutSplit,
 } from '../../services/types/workout'
@@ -27,6 +28,7 @@ interface WorkoutContentProps {
   onChangeSplit: () => void
   onCreateSplit: () => void
   onCreateRoutine: () => void
+  onEditRoutine: (routine: WorkoutRoutine) => void
   onSelectExercise: (
     exercise: WorkoutRoutineExercise,
   ) => void
@@ -46,6 +48,7 @@ export function WorkoutContent({
   onChangeSplit,
   onCreateSplit,
   onCreateRoutine,
+  onEditRoutine,
   onSelectExercise,
 }: WorkoutContentProps) {
   const splitDayRoutine =
@@ -98,6 +101,9 @@ export function WorkoutContent({
         }
         onCreateRoutine={
           onCreateRoutine
+        }
+        onEditRoutine={
+          onEditRoutine
         }
       />
 

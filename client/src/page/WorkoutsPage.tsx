@@ -3,33 +3,43 @@ import {
   useState,
 } from 'react'
 import { useOutletContext } from 'react-router-dom'
+
 import { WorkoutContent } from '../components/workout/WorkoutContent'
 import { unlockRestAlarm } from '../components/workout/restAlarm.utils'
 import { WorkoutErrorState } from '../components/workout/WorkoutErrorState'
 import { getFirstName, PageHeader } from '../components/layout/PageHeader'
 import { WorkoutSkeleton } from '../components/workout/WorkoutSkeleton'
+
 import { ActiveWorkoutModal } from '../components/workout/modals/ActiveWorkoutModal'
 import { ChangeWorkoutSplitModal } from '../components/workout/modals/ChangeWorkoutSplitModal'
 import { CreateWorkoutRoutineModal } from '../components/workout/modals/CreateWorkoutRoutineModal'
 import { CreateWorkoutSplitModal } from '../components/workout/modals/CreateWorkoutSplitModal'
+import { EditWorkoutRoutineModal } from '../components/workout/modals/EditWorkoutRoutineModal'
 import { ExerciseDetailsModal } from '../components/workout/modals/ExerciseDetailsModal'
+
 import {
   useActivateWorkoutSplit,
   useCreateWorkoutRoutine,
   useCreateWorkoutSplit,
   useStartWorkout,
+  useUpdateWorkoutRoutine,
   useWorkoutExercises,
   useWorkoutHistory,
   useWorkoutOverview,
   useWorkoutRoutines,
   useWorkoutSplits,
 } from '../hooks/useWorkout'
+
 import type { DashboardLayoutContext } from '../layouts/MainDashboardLayout'
+
 import type {
   CreateWorkoutRoutineInput,
   CreateWorkoutSplitInput,
+  UpdateWorkoutRoutineInput,
+  WorkoutRoutine,
   WorkoutRoutineExercise,
 } from '../services/types/workout'
+
 import { useToastStore } from '../stores/toastStore'
 import { useDashboard } from '../hooks/useDashboard'
 
@@ -60,6 +70,18 @@ export function WorkoutsPage() {
     createRoutineOpen,
     setCreateRoutineOpen,
   ] = useState(false)
+
+  const [
+    editRoutineOpen,
+    setEditRoutineOpen,
+  ] = useState(false)
+
+  const [
+    selectedRoutine,
+    setSelectedRoutine,
+  ] = useState<WorkoutRoutine | null>(
+    null,
+  )
 
   const [
     returnToSplitAfterRoutine,
@@ -118,6 +140,9 @@ export function WorkoutsPage() {
   const createRoutineMutation =
     useCreateWorkoutRoutine()
 
+  const updateRoutineMutation =
+    useUpdateWorkoutRoutine()
+
   const createSplitMutation =
     useCreateWorkoutSplit()
 
@@ -126,6 +151,7 @@ export function WorkoutsPage() {
 
   const dashboardUser =
     dashboardQuery.data?.data.user
+
   /*
    * The full exercise library is intentionally kept in memory
    * and passed into the Today/Active Workout components.
@@ -137,10 +163,12 @@ export function WorkoutsPage() {
     []
 
   const splits =
-    splitsQuery.data?.data ?? []
+    splitsQuery.data?.data ??
+    []
 
   const history =
-    historyQuery.data?.data ?? []
+    historyQuery.data?.data ??
+    []
 
   const routines =
     routinesQuery.data?.data ??
@@ -216,6 +244,18 @@ export function WorkoutsPage() {
     setCreateRoutineOpen(true)
   }
 
+  const openEditRoutine = (
+    routine: WorkoutRoutine,
+  ) => {
+    setSelectedRoutine(routine)
+    setEditRoutineOpen(true)
+  }
+
+  const closeEditRoutine = () => {
+    setEditRoutineOpen(false)
+    setSelectedRoutine(null)
+  }
+
   const openActiveWorkout =
     () => {
       void unlockRestAlarm()
@@ -240,6 +280,7 @@ export function WorkoutsPage() {
       setActiveSessionId(
         sessionId,
       )
+
       setActiveWorkoutOpen(
         true,
       )
@@ -257,9 +298,11 @@ export function WorkoutsPage() {
         setActiveSessionId(
           overview.active_session.id,
         )
+
         setActiveWorkoutOpen(
           true,
         )
+
         return
       }
 
@@ -293,6 +336,7 @@ export function WorkoutsPage() {
         setActiveSessionId(
           response.data.id,
         )
+
         setActiveWorkoutOpen(
           true,
         )
@@ -365,6 +409,7 @@ export function WorkoutsPage() {
           returnToSplitAfterRoutine
 
         setCreateRoutineOpen(false)
+
         setReturnToSplitAfterRoutine(
           false,
         )
@@ -390,6 +435,45 @@ export function WorkoutsPage() {
           type: 'error',
           heading:
             'Could not create routine',
+          subheading:
+            error instanceof Error
+              ? error.message
+              : 'Please try again.',
+        })
+
+        throw error
+      }
+    }
+
+  const handleUpdateRoutine =
+    async (
+      routineId: string,
+      input: UpdateWorkoutRoutineInput,
+    ) => {
+      try {
+        const response =
+          await updateRoutineMutation.mutateAsync(
+            {
+              routineId,
+              input,
+            },
+          )
+
+        closeEditRoutine()
+
+        showToast({
+          type: 'success',
+          heading:
+            'Workout routine updated',
+          subheading:
+            response.message ||
+            'Your workout routine has been updated.',
+        })
+      } catch (error) {
+        showToast({
+          type: 'error',
+          heading:
+            'Could not update routine',
           subheading:
             error instanceof Error
               ? error.message
@@ -458,11 +542,20 @@ export function WorkoutsPage() {
       <PageHeader
         title={`Ready to train, ${getFirstName(dashboardUser?.full_name)} 👋`}
         subtitle="Track your split, routines, and today's workout."
-        fullName={dashboardUser?.full_name}
-        avatarUrl={dashboardUser?.avatar_url ?? null}
-        onOpenSidebar={openSidebar}
+        fullName={
+          dashboardUser?.full_name
+        }
+        avatarUrl={
+          dashboardUser?.avatar_url ??
+          null
+        }
+        onOpenSidebar={
+          openSidebar
+        }
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={
+          setSearch
+        }
         searchPlaceholder="Search workouts..."
       />
 
@@ -502,6 +595,9 @@ export function WorkoutsPage() {
         onCreateRoutine={() =>
           openCreateRoutine(false)
         }
+        onEditRoutine={
+          openEditRoutine
+        }
         onSelectExercise={
           setSelectedExercise
         }
@@ -511,7 +607,8 @@ export function WorkoutsPage() {
         open={changeSplitOpen}
         splits={splits}
         currentSplitId={
-          activeSplit?.id ?? null
+          activeSplit?.id ??
+          null
         }
         isSubmitting={
           activateSplitMutation.isPending
@@ -536,12 +633,28 @@ export function WorkoutsPage() {
           setCreateRoutineOpen(
             false,
           )
+
           setReturnToSplitAfterRoutine(
             false,
           )
         }}
         onCreate={
           handleCreateRoutine
+        }
+      />
+
+      <EditWorkoutRoutineModal
+        open={editRoutineOpen}
+        routine={selectedRoutine}
+        exercises={exercises}
+        isSubmitting={
+          updateRoutineMutation.isPending
+        }
+        onClose={
+          closeEditRoutine
+        }
+        onUpdate={
+          handleUpdateRoutine
         }
       />
 
@@ -595,6 +708,7 @@ export function WorkoutsPage() {
           setActiveWorkoutOpen(
             false,
           )
+
           setActiveSessionId(
             null,
           )
