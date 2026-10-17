@@ -4,6 +4,7 @@ import { aiServiceClient } from '../services/ai-service.client.js';
 import { mealParser } from '../services/meal-parser/index.js';
 
 const MAX_PARSE_TEXT_LENGTH = 5000;
+const MAX_BATCH_ITEMS = 50;
 const VALID_MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = 480;
@@ -208,6 +209,11 @@ export const parseMealText = async (
   }
 };
 
+/**
+ * POST /meals/parse
+ * New layered parser (table -> local food DB -> LLM fallback).
+ * Legacy POST /meals/parse-ai is left untouched.
+ */
 export const parseMealV2 = async (
   req: Request,
   res: Response,
@@ -383,6 +389,171 @@ export const logMeal = async (
       success: false,
       error: 'Internal Server Error',
       message: err instanceof Error ? err.message : 'Failed to log meal',
+    });
+  }
+};
+
+const toNonNegativeNumber = (value: unknown): number | null => {
+  const number = Number(value ?? 0);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+};
+
+/**
+ * POST /meals/log/batch
+ * Logs every food item as its own meal_logs row (one request, one INSERT, so it
+ * either all saves or none of it does). Body:
+ * { meal_type?, items: [{ name, calories, protein, carbs, fat, raw_input_prompt?, ...extra }] }
+ */
+export const logMealItems = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+        message: 'User ID missing',
+      });
+      return;
+    }
+
+    const requestBody =
+      req.body && typeof req.body === 'object' ? req.body : {};
+    const items: unknown = requestBody.items;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: 'At least one food item is required to log a meal.',
+      });
+      return;
+    }
+
+    if (items.length > MAX_BATCH_ITEMS) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: `You can log up to ${MAX_BATCH_ITEMS} food items at once.`,
+      });
+      return;
+    }
+
+    const rawMealType =
+      typeof requestBody.meal_type === 'string'
+        ? requestBody.meal_type.toLowerCase()
+        : '';
+    const mealType = (VALID_MEAL_TYPES as readonly string[]).includes(rawMealType)
+      ? rawMealType
+      : 'snack';
+
+    const nowMs = Date.now();
+    const rows = [];
+
+    for (const [index, entry] of items.entries()) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+        res.status(400).json({
+          success: false,
+          error: 'Bad Request',
+          message: `Food item ${index + 1} is invalid.`,
+        });
+        return;
+      }
+
+      const { raw_input_prompt: itemPrompt, ...foodItem } = entry as Record<
+        string,
+        unknown
+      >;
+
+      const name = typeof foodItem.name === 'string' ? foodItem.name.trim() : '';
+
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: 'Bad Request',
+          message: `Food item ${index + 1} needs a name.`,
+        });
+        return;
+      }
+
+      const calories = toNonNegativeNumber(foodItem.calories);
+      const protein = toNonNegativeNumber(foodItem.protein);
+      const carbs = toNonNegativeNumber(foodItem.carbs);
+      const fat = toNonNegativeNumber(foodItem.fat);
+
+      if (calories === null || protein === null || carbs === null || fat === null) {
+        res.status(400).json({
+          success: false,
+          error: 'Bad Request',
+          message: `"${name}" has invalid nutrition values. Use non-negative numbers.`,
+        });
+        return;
+      }
+
+      const finalCalories = Math.round(calories);
+      const finalProtein = round1(protein);
+      const finalCarbs = round1(carbs);
+      const finalFat = round1(fat);
+
+      rows.push({
+        user_id: userId,
+        meal_type: mealType,
+        raw_input_prompt:
+          typeof itemPrompt === 'string' && itemPrompt.trim()
+            ? itemPrompt.trim().slice(0, 500)
+            : name,
+        food_items: [
+          {
+            ...foodItem,
+            name,
+            calories: finalCalories,
+            protein: finalProtein,
+            carbs: finalCarbs,
+            fat: finalFat,
+          },
+        ],
+        total_calories: finalCalories,
+        total_protein: finalProtein,
+        total_carbs: finalCarbs,
+        total_fat: finalFat,
+        // The list is sorted newest-first, so step each item back by 1 ms to
+        // keep the order the user entered them in.
+        logged_at: new Date(nowMs - index).toISOString(),
+      });
+    }
+
+    const { data: newMealLogs, error } = await supabaseAdmin
+      .from('meal_logs')
+      .insert(rows)
+      .select('*');
+
+    if (error) {
+      console.error('Supabase Batch Meal Log Error:', error);
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: error.message,
+      });
+      return;
+    }
+
+    res.status(201).json({
+      success: true,
+      message:
+        rows.length === 1
+          ? 'Meal logged successfully!'
+          : `${rows.length} meals logged successfully!`,
+      data: newMealLogs ?? [],
+    });
+  } catch (err) {
+    console.error('Log Meal Items Internal Error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: err instanceof Error ? err.message : 'Failed to log meals',
     });
   }
 };

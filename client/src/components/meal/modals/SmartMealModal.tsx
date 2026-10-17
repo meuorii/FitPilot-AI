@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { ArrowLeft, Calculator, Check, Loader2, Trash2, X } from 'lucide-react'
 
-import { useLogMeal, useParseMealSmart } from '../../../hooks/useMeal'
+import { useLogMealItems, useParseMealSmart } from '../../../hooks/useMeal'
 import type { MealType, SmartParsedMeal } from '../../../services/types/meal'
 import { useToastStore } from '../../../stores/toastStore'
 import { formatMacroNumber, getDefaultMealType } from '../meal.utils'
@@ -22,8 +22,6 @@ import {
   SMART_TABLE_EXAMPLE,
   SMART_TEXT_EXAMPLE,
   buildLogPayload,
-  buildLogPrompt,
-  isTableInput,
   sumEditableFoods,
   toEditableFoods,
   type EditableSmartFood,
@@ -57,7 +55,7 @@ export function SmartMealModal({ open, onClose }: SmartMealModalProps) {
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const parseMutation = useParseMealSmart()
-  const logMutation = useLogMeal()
+  const logMutation = useLogMealItems()
   const showToast = useToastStore((state) => state.showToast)
 
   const busy = parseMutation.isPending || logMutation.isPending
@@ -153,21 +151,12 @@ export function SmartMealModal({ open, onClose }: SmartMealModalProps) {
     try {
       const response = await logMutation.mutateAsync({
         meal_type: mealType,
-        raw_input_prompt: buildLogPrompt(
-          text,
-          payload.items.map((item) => String(item.name ?? '')),
-          isTableInput(text),
-        ),
-        foods: payload.items,
-        total_calories: payload.totals.calories,
-        total_protein: payload.totals.protein,
-        total_carbs: payload.totals.carbs,
-        total_fat: payload.totals.fat,
+        items: payload.items,
       })
 
       showToast({
         type: 'success',
-        heading: 'Meal logged',
+        heading: payload.items.length === 1 ? 'Meal logged' : `${payload.items.length} meals logged`,
         subheading: response.message || 'Your nutrition totals are now updated.',
       })
 
@@ -452,6 +441,13 @@ export function SmartMealModal({ open, onClose }: SmartMealModalProps) {
             </div>
 
             <MealTypeSelector value={mealType} onChange={setMealType} disabled={busy} />
+
+            {foods.length > 1 ? (
+              <p className="text-[11px] leading-5 text-[#8B8690]">
+                Each food will be saved as its own entry under{' '}
+                <span className="font-bold capitalize">{mealType}</span>.
+              </p>
+            ) : null}
           </div>
         )}
 
@@ -483,7 +479,7 @@ export function SmartMealModal({ open, onClose }: SmartMealModalProps) {
               ) : (
                 <Check className="h-4 w-4" />
               )}
-              Log Meal
+              {foods.length > 1 ? `Log ${foods.length} Items` : 'Log Meal'}
             </button>
           ) : (
             <button

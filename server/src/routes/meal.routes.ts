@@ -4,6 +4,7 @@ import {
   parseMealText,
   parseMealV2,
   logMeal,
+  logMealItems,
   getTodayMeals,
   getYesterdayMeals,
   getMealsByDate,
@@ -23,6 +24,9 @@ router.post('/parse-ai', parseMealText);
 router.post('/parse', parseMealV2);
 
 router.post('/log', logMeal);
+
+// Logs each food item as its own meal entry (used by the Smart Meal Parser)
+router.post('/log/batch', logMealItems);
 
 // Daily meal views
 router.get('/today', getTodayMeals);

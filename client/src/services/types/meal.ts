@@ -130,6 +130,30 @@ export interface ParseMealSmartInput {
 }
 
 // -----------------------------------------------------------------------------
+// POST /meals/log/batch
+//
+// Logs every food item as its own meal entry (one row in meal_logs per item)
+// in a single request. Unknown extra fields are stored with the food item.
+// -----------------------------------------------------------------------------
+
+export interface LogMealItemInput {
+  name: string;
+  /** Shown as the entry's title. Defaults to `name` on the backend. */
+  raw_input_prompt?: string;
+  serving_size?: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  [key: string]: unknown;
+}
+
+export interface LogMealItemsInput {
+  meal_type?: MealType;
+  items: LogMealItemInput[];
+}
+
+// -----------------------------------------------------------------------------
 // POST /meals/log
 //
 // logMeal() accepts either a flat body or a body with a nested `data` object
@@ -318,6 +342,7 @@ export interface MealHistoryData {
 export type ParseMealTextResponse = MealApiResponse<ParsedMealData>;
 export type ParseMealSmartResponse = MealApiResponse<SmartParsedMeal>;
 export type LogMealResponse = MealApiResponse<MealLogRecord>;
+export type LogMealItemsResponse = MealApiResponse<MealLogRecord[]>;
 export type MealsByDateResponse = MealApiResponse<MealsByDateData>;
 export type TodayMealsResponse = MealsByDateResponse;
 export type YesterdayMealsResponse = MealsByDateResponse;

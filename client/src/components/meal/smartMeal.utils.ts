@@ -1,5 +1,5 @@
 import type {
-  MealFoodItem,
+  LogMealItemInput,
   MealNutritionTotals,
   SmartParsedFood,
   SmartParseSource,
@@ -109,6 +109,7 @@ export interface EditableSmartFood {
   source: SmartParseSource
   confidence: number
   notes: string | null
+  raw_text: string | null
   calories: string
   protein: string
   carbs: string
@@ -149,6 +150,7 @@ export const toEditableFoods = (foods: SmartParsedFood[]): EditableSmartFood[] =
       source: food.source,
       confidence: food.confidence,
       notes: food.notes,
+      raw_text: food.raw_text,
       calories: isManual ? '' : String(Math.round(food.calories)),
       protein: isManual ? '' : String(round1(food.protein)),
       carbs: isManual ? '' : String(round1(food.carbs)),
@@ -179,12 +181,23 @@ export const sumEditableFoods = (
   )
 
 export type LogPayloadResult =
-  | { ok: true; items: MealFoodItem[]; totals: MealNutritionTotals }
+  | { ok: true; items: LogMealItemInput[]; totals: MealNutritionTotals }
   | { ok: false; error: string }
 
-/** Validates the edited rows and converts them to the shape POST /meals/log stores. */
+/** Title of a single logged entry, e.g. "White Rice (150g)". */
+export const buildItemPrompt = (food: Pick<EditableSmartFood, 'name' | 'serving'>): string => {
+  const title = food.serving && !food.name.includes(food.serving)
+    ? `${food.name} (${food.serving})`
+    : food.name
+  return title.length > 240 ? `${title.slice(0, 237)}...` : title
+}
+
+/**
+ * Validates the edited rows and converts them to the shape POST /meals/log/batch
+ * expects: one item per food, each becoming its own meal entry.
+ */
 export const buildLogPayload = (foods: EditableSmartFood[]): LogPayloadResult => {
-  const items: MealFoodItem[] = []
+  const items: LogMealItemInput[] = []
 
   for (const food of foods) {
     const calories = parseMacroInput(food.calories)
@@ -201,6 +214,7 @@ export const buildLogPayload = (foods: EditableSmartFood[]): LogPayloadResult =>
 
     items.push({
       name: food.name,
+      raw_input_prompt: buildItemPrompt(food),
       ...(food.serving ? { serving_size: food.serving } : {}),
       quantity: food.quantity,
       serving_unit: food.unit,
@@ -216,10 +230,10 @@ export const buildLogPayload = (foods: EditableSmartFood[]): LogPayloadResult =>
 
   const totals = items.reduce<MealNutritionTotals>(
     (sum, item) => ({
-      calories: sum.calories + (item.calories ?? 0),
-      protein: sum.protein + (item.protein ?? 0),
-      carbs: sum.carbs + (item.carbs ?? 0),
-      fat: sum.fat + (item.fat ?? 0),
+      calories: sum.calories + item.calories,
+      protein: sum.protein + item.protein,
+      carbs: sum.carbs + item.carbs,
+      fat: sum.fat + item.fat,
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   )

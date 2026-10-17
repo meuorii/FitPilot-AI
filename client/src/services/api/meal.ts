@@ -1,6 +1,8 @@
 import type {
   DeleteMealResponse,
   LogMealInput,
+  LogMealItemsInput,
+  LogMealItemsResponse,
   LogMealResponse,
   LogParsedMealInput,
   MealHistoryQuery,
@@ -127,6 +129,16 @@ export const logMeal = async (
   input: LogMealInput,
 ): Promise<LogMealResponse> =>
   request<LogMealResponse>('/log', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+// POST /meals/log/batch — every food item is saved as its own meal entry,
+// in one request (all saved or none). Response data is the inserted rows.
+export const logMealItems = async (
+  input: LogMealItemsInput,
+): Promise<LogMealItemsResponse> =>
+  request<LogMealItemsResponse>('/log/batch', {
     method: 'POST',
     body: JSON.stringify(input),
   });

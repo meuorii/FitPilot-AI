@@ -8,12 +8,14 @@ import {
   getWeeklyMeals,
   getYesterdayMeals,
   logMeal,
+  logMealItems,
   logParsedMeal,
   parseMealSmart,
   parseMealText,
 } from '../services/api/meal'
 import type {
   LogMealInput,
+  LogMealItemsInput,
   LogParsedMealInput,
   MealDayViewResponse,
   MealHistoryQuery,
@@ -144,6 +146,16 @@ export const useLogMeal = () => {
 
   return useMutation({
     mutationFn: (input: LogMealInput) => logMeal(input),
+    onSuccess: async () => invalidateMealAndDashboard(queryClient),
+  })
+}
+
+/** Logs each food item as its own meal entry (POST /meals/log/batch). */
+export const useLogMealItems = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: LogMealItemsInput) => logMealItems(input),
     onSuccess: async () => invalidateMealAndDashboard(queryClient),
   })
 }
