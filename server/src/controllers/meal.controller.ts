@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 import { supabaseAdmin } from '../config/supabase.js';
 import { aiServiceClient } from '../services/ai-service.client.js';
+import { mealParser } from '../services/meal-parser/index.js';
+
+const MAX_PARSE_TEXT_LENGTH = 5000;
+const VALID_MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = 480;
 const MIN_TIMEZONE_OFFSET_MINUTES = -720;
@@ -200,6 +204,71 @@ export const parseMealText = async (
         err instanceof Error
           ? err.message
           : 'Failed to parse meal with AI service',
+    });
+  }
+};
+
+export const parseMealV2 = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+        message: 'User ID missing',
+      });
+      return;
+    }
+
+    const { text, meal_type: rawMealType } = req.body ?? {};
+
+    if (typeof text !== 'string' || !text.trim()) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: 'Please provide a non-empty text to parse.',
+      });
+      return;
+    }
+
+    if (text.length > MAX_PARSE_TEXT_LENGTH) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: `Text is too long (max ${MAX_PARSE_TEXT_LENGTH} characters).`,
+      });
+      return;
+    }
+
+    const mealType =
+      typeof rawMealType === 'string' &&
+      (VALID_MEAL_TYPES as readonly string[]).includes(rawMealType.toLowerCase())
+        ? rawMealType.toLowerCase()
+        : undefined;
+
+    const result = await mealParser.parse(text.trim(), { userId, mealType });
+
+    res.status(200).json({
+      success: true,
+      message: result.needs_manual_edit
+        ? 'Meal partially parsed. Please review and edit.'
+        : 'Meal parsed successfully',
+      data: {
+        ...result,
+        meal_type: mealType ?? null,
+        raw_input_prompt: text.trim(),
+      },
+    });
+  } catch (err) {
+    console.error('Parse Meal V2 Error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: err instanceof Error ? err.message : 'Failed to parse meal',
     });
   }
 };

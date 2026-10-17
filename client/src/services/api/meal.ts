@@ -6,6 +6,8 @@ import type {
   MealHistoryQuery,
   MealHistoryResponse,
   MealsByDateResponse,
+  ParseMealSmartInput,
+  ParseMealSmartResponse,
   ParseMealTextInput,
   ParseMealTextResponse,
   TodayMealsResponse,
@@ -14,7 +16,7 @@ import type {
   YesterdayMealsResponse,
 } from '../types/meal';
 
-export const BASE_URL = 'https://fitpilot-api-rp3p.onrender.com/api/v1';
+export const BASE_URL = 'http://localhost:5000/api/v1';
 
 const AUTH_TOKEN_KEY = 'fitpilot_token';
 
@@ -92,6 +94,22 @@ export const parseMealText = async (
   input: ParseMealTextInput,
 ): Promise<ParseMealTextResponse> =>
   request<ParseMealTextResponse>('/parse-ai', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+// -----------------------------------------------------------------------------
+// Smart meal parser — POST /meals/parse
+//
+// Reads a pasted nutrition table (macros taken from the user's own values) or
+// free text (matched against the backend's local food database). Does not use
+// the AI service, so it keeps working when /parse-ai is rate limited.
+// -----------------------------------------------------------------------------
+
+export const parseMealSmart = async (
+  input: ParseMealSmartInput,
+): Promise<ParseMealSmartResponse> =>
+  request<ParseMealSmartResponse>('/parse', {
     method: 'POST',
     body: JSON.stringify(input),
   });

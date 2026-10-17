@@ -9,6 +9,7 @@ import { MealSkeleton } from '../components/meal/MealSkeleton'
 import { DeleteMealConfirmModal } from '../components/meal/modals/DeleteMealConfirmModal'
 import { ManualMealModal } from '../components/meal/modals/ManualMealModal'
 import { MealDetailsModal } from '../components/meal/modals/MealDetailsModal'
+import { SmartMealModal } from '../components/meal/modals/SmartMealModal'
 import { useDashboard } from '../hooks/useDashboard'
 import {
   useMealHistory,
@@ -41,6 +42,7 @@ export function MealsPage() {
   const [search, setSearch] = useState('')
   const [selectedDate, setSelectedDate] = useState(getLocalDateKey())
   const [manualOpen, setManualOpen] = useState(false)
+  const [smartOpen, setSmartOpen] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState<MealLog | null>(null)
   const [mealToDelete, setMealToDelete] = useState<MealLog | null>(null)
 
@@ -88,6 +90,11 @@ export function MealsPage() {
   const openManualMeal = () => {
     if (!isToday) setSelectedDate(today)
     setManualOpen(true)
+  }
+
+  const openSmartParser = () => {
+    if (!isToday) setSelectedDate(today)
+    setSmartOpen(true)
   }
 
   const viewTodayMeals = () => {
@@ -141,6 +148,7 @@ export function MealsPage() {
         parserTextareaRef={parserTextareaRef}
         mealsSectionRef={mealsSectionRef}
         onFocusParser={focusParser}
+        onOpenSmartParser={openSmartParser}
         onOpenManualMeal={openManualMeal}
         onViewTodayMeals={viewTodayMeals}
         onViewHistory={viewHistory}
@@ -158,6 +166,11 @@ export function MealsPage() {
         selectedDate={selectedDate}
         onSelectDate={handleDateChange}
         sectionRef={historySectionRef}
+      />
+
+      <SmartMealModal
+        open={smartOpen}
+        onClose={() => setSmartOpen(false)}
       />
 
       <ManualMealModal

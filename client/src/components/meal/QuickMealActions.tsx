@@ -1,5 +1,6 @@
 import {
   ChevronRight,
+  ClipboardPaste,
   History,
   ListChecks,
   Plus,
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react'
 
 interface QuickMealActionsProps {
+  onSmartParse: () => void
   onParseAI: () => void
   onLogManual: () => void
   onViewToday: () => void
@@ -14,12 +16,20 @@ interface QuickMealActionsProps {
 }
 
 export function QuickMealActions({
+  onSmartParse,
   onParseAI,
   onLogManual,
   onViewToday,
   onViewHistory,
 }: QuickMealActionsProps) {
   const actions = [
+    {
+      label: 'Smart Meal Parser',
+      description: 'Paste text or a nutrition table',
+      icon: ClipboardPaste,
+      onClick: onSmartParse,
+      badge: 'New',
+    },
     {
       label: 'Parse AI Meal',
       description: 'Describe your meal with AI',
@@ -53,7 +63,7 @@ export function QuickMealActions({
       </h2>
 
       <div className="mt-4 space-y-2">
-        {actions.map(({ label, description, icon: Icon, onClick }) => (
+        {actions.map(({ label, description, icon: Icon, onClick, badge }) => (
           <button
             key={label}
             type="button"
@@ -64,7 +74,14 @@ export function QuickMealActions({
               <Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-extrabold text-[#38323F]">{label}</p>
+              <p className="flex items-center gap-2 text-sm font-extrabold text-[#38323F]">
+                {label}
+                {badge ? (
+                  <span className="rounded-full bg-[#7482A4]/12 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#7482A4]">
+                    {badge}
+                  </span>
+                ) : null}
+              </p>
               <p className="mt-0.5 truncate text-[11px] text-[#8B8690]">{description}</p>
             </div>
             <ChevronRight className="h-4 w-4 text-[#A19CA5] transition group-hover:translate-x-0.5" />

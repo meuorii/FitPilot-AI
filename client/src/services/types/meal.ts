@@ -71,6 +71,65 @@ export interface ParseMealTextInput {
 }
 
 // -----------------------------------------------------------------------------
+// Smart meal parser — POST /meals/parse
+//
+// Layered parser on the backend: pasted nutrition table -> local Filipino food
+// database -> manual placeholders. It does not depend on an AI service, and it
+// is separate from the legacy POST /meals/parse-ai above.
+// -----------------------------------------------------------------------------
+
+/**
+ * Where the numbers for a parsed food came from:
+ * - table:  read directly from the values the user pasted
+ * - db:     estimated from the local food database
+ * - ai:     estimated by an optional AI fallback
+ * - manual: not recognised, macros are 0 and must be filled in by the user
+ */
+export type SmartParseSource = 'table' | 'db' | 'ai' | 'manual';
+
+/** Which backend layer produced the overall result. */
+export type SmartParserKind = 'table' | 'db' | 'ai' | 'mixed' | 'none';
+
+export type SmartParsedFood = {
+  name: string;
+  quantity: number;
+  unit: string;
+  weight_g: number | null;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  source: SmartParseSource;
+  /** 0..1 */
+  confidence: number;
+  notes: string | null;
+  raw_text: string | null;
+};
+
+export interface SmartParsedMeal {
+  foods: SmartParsedFood[];
+  total_calories: number;
+  total_protein: number;
+  total_carbs: number;
+  total_fat: number;
+  /** 0..1 */
+  confidence: number;
+  /** true when some items were not recognised and need macros from the user */
+  needs_manual_edit: boolean;
+  parser: SmartParserKind;
+  warnings: string[];
+  /** Segments of the input that could not be matched to any food. */
+  unmatched: string[];
+  meal_type: MealType | null;
+  raw_input_prompt: string;
+}
+
+export interface ParseMealSmartInput {
+  text: string;
+  meal_type?: MealType;
+}
+
+// -----------------------------------------------------------------------------
 // POST /meals/log
 //
 // logMeal() accepts either a flat body or a body with a nested `data` object
@@ -257,6 +316,7 @@ export interface MealHistoryData {
 // -----------------------------------------------------------------------------
 
 export type ParseMealTextResponse = MealApiResponse<ParsedMealData>;
+export type ParseMealSmartResponse = MealApiResponse<SmartParsedMeal>;
 export type LogMealResponse = MealApiResponse<MealLogRecord>;
 export type MealsByDateResponse = MealApiResponse<MealsByDateData>;
 export type TodayMealsResponse = MealsByDateResponse;

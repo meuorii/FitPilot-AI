@@ -24,6 +24,7 @@ interface MealContentProps {
   mealsSectionRef: RefObject<HTMLElement | null>
   onDateChange: (date: string) => void
   onFocusParser: () => void
+  onOpenSmartParser: () => void
   onOpenManualMeal: () => void
   onViewTodayMeals: () => void
   onViewHistory: () => void
@@ -45,6 +46,7 @@ export function MealContent({
   mealsSectionRef,
   onDateChange,
   onFocusParser,
+  onOpenSmartParser,
   onOpenManualMeal,
   onViewTodayMeals,
   onViewHistory,
@@ -91,6 +93,7 @@ export function MealContent({
 
         <aside className="min-w-0 space-y-5">
           <QuickMealActions
+            onSmartParse={onOpenSmartParser}
             onParseAI={onFocusParser}
             onLogManual={onOpenManualMeal}
             onViewToday={onViewTodayMeals}

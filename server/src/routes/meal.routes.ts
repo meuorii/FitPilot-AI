@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticateUser } from '../middleware/auth.middleware.js';
 import {
   parseMealText,
+  parseMealV2,
   logMeal,
   getTodayMeals,
   getYesterdayMeals,
@@ -15,7 +16,12 @@ const router = Router();
 
 router.use(authenticateUser);
 
+// Legacy HF-based parser (kept for backwards compatibility)
 router.post('/parse-ai', parseMealText);
+
+// New layered parser: table -> local food DB -> LLM fallback
+router.post('/parse', parseMealV2);
+
 router.post('/log', logMeal);
 
 // Daily meal views

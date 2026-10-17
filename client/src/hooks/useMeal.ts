@@ -9,6 +9,7 @@ import {
   getYesterdayMeals,
   logMeal,
   logParsedMeal,
+  parseMealSmart,
   parseMealText,
 } from '../services/api/meal'
 import type {
@@ -17,6 +18,8 @@ import type {
   MealDayViewResponse,
   MealHistoryQuery,
   MealHistoryResponse,
+  ParseMealSmartInput,
+  ParseMealSmartResponse,
   ParseMealTextInput,
   WeeklyMealsQuery,
   WeeklyMealsResponse,
@@ -119,6 +122,12 @@ export const useMealHistory = (query: MealHistoryQuery = {}) => {
 export const useParseMeal = () =>
   useMutation({
     mutationFn: (input: ParseMealTextInput) => parseMealText(input),
+  })
+
+/** Smart parser (POST /meals/parse): pasted tables + free text, no AI required. */
+export const useParseMealSmart = () =>
+  useMutation<ParseMealSmartResponse, Error, ParseMealSmartInput>({
+    mutationFn: (input) => parseMealSmart(input),
   })
 
 const invalidateMealAndDashboard = async (
