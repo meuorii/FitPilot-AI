@@ -132,7 +132,10 @@ export const formatSmartServing = (
   if (!hasWeight || food.weight_g === null) return base
 
   const grams = `${round1(food.weight_g)}g`
-  return food.unit === 'g' ? grams : `${base} (${grams})`
+  // "1 serving (86g)" is redundant: when the unit is just "serving", show the weight only.
+  if (food.unit === 'g' || (food.unit === 'serving' && food.quantity === 1)) return grams
+
+  return `${base} (${grams})`
 }
 
 export const toEditableFoods = (foods: SmartParsedFood[]): EditableSmartFood[] =>
