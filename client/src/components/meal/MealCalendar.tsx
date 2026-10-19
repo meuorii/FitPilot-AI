@@ -51,13 +51,13 @@ export function MealCalendar({ value, week, history, onChange }: MealCalendarPro
   }
 
   return (
-    <section className="rounded-[24px] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.045)] sm:p-6">
+    <section className="rounded-[22px] border border-[#7482A4]/12 bg-white p-4 shadow-[0_6px_22px_rgba(56,50,63,0.04)] sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#7482A4]">
             Nutrition calendar
           </p>
-          <h2 className="mt-1 text-lg font-extrabold tracking-[-0.025em] text-[#38323F]">
+          <h2 className="mt-1 text-base font-extrabold tracking-[-0.025em] text-[#38323F]">
             {monthStart.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
           </h2>
         </div>
@@ -83,7 +83,7 @@ export function MealCalendar({ value, week, history, onChange }: MealCalendarPro
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-7 gap-y-1 text-center">
+      <div className="mt-4 grid grid-cols-7 gap-y-1 text-center">
         {WEEK_DAYS.map((day) => (
           <span key={day} className="pb-2 text-[10px] font-extrabold uppercase tracking-wide text-[#A09BA5]">
             {day}
@@ -110,7 +110,7 @@ export function MealCalendar({ value, week, history, onChange }: MealCalendarPro
             >
               <span
                 className={[
-                  'grid h-8 w-8 place-items-center rounded-xl text-xs font-bold transition',
+                  'grid h-7 w-7 place-items-center rounded-full text-xs font-bold transition',
                   isSelected
                     ? 'bg-[#7482A4] text-white shadow-[0_5px_14px_rgba(116,130,164,0.22)]'
                     : isToday

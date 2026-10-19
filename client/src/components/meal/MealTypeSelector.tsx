@@ -22,9 +22,9 @@ export function MealTypeSelector({
 }: MealTypeSelectorProps) {
   return (
     <fieldset disabled={disabled}>
-      <legend className="mb-2 text-xs font-extrabold text-[#38323F]">
+      {/* <legend className="mb-2 text-xs font-extrabold text-[#38323F]">
         Meal Type
-      </legend>
+      </legend> */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {options.map(({ value: optionValue, label, icon: Icon }) => {
           const selected = value === optionValue

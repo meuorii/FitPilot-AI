@@ -33,50 +33,18 @@ interface MealContentProps {
 }
 
 export function MealContent({
-  meals,
-  summary,
-  targets,
-  dashboardNutrition,
-  date,
-  isToday,
-  search,
-  week,
-  history,
-  parserTextareaRef,
-  mealsSectionRef,
-  onDateChange,
-  onFocusParser,
-  onOpenSmartParser,
-  onOpenManualMeal,
-  onViewTodayMeals,
-  onViewHistory,
-  onSelectMeal,
-  onDeleteMeal,
+  meals, summary, targets, dashboardNutrition, date, isToday, search, week, history,
+  parserTextareaRef, mealsSectionRef, onDateChange, onFocusParser, onOpenSmartParser,
+  onOpenManualMeal, onViewTodayMeals, onViewHistory, onSelectMeal, onDeleteMeal,
 }: MealContentProps) {
   const nutrition = buildNutritionView(summary, dashboardNutrition, targets)
   const dateLabel = isToday ? 'Today' : formatMealDateKey(date)
 
   return (
-    <div className="space-y-6">
-      <MealHero onParseAI={onFocusParser} />
-
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(330px,0.85fr)]">
-        <DailyNutritionOverview
-          nutrition={nutrition}
-          mealsCount={meals.length}
-          dateLabel={dateLabel}
-          isToday={isToday}
-        />
-        <MealCalendar
-          value={date}
-          week={week}
-          history={history}
-          onChange={onDateChange}
-        />
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.85fr)]">
-        <div className="min-w-0 space-y-5">
+    <div className="mt-5 min-w-0 space-y-4 2xl:space-y-5">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(300px,0.9fr)] 2xl:gap-5">
+        <div className="min-w-0 space-y-4 2xl:space-y-5">
+          <MealHero onParseAI={onFocusParser} />
           <AIMealParser textareaRef={parserTextareaRef} />
           <TodayMealsList
             meals={meals}
@@ -91,7 +59,14 @@ export function MealContent({
           />
         </div>
 
-        <aside className="min-w-0 space-y-5">
+        <aside className="min-w-0 space-y-4 2xl:space-y-5">
+          <MealCalendar value={date} week={week} history={history} onChange={onDateChange} />
+          <DailyNutritionOverview
+            nutrition={nutrition}
+            mealsCount={meals.length}
+            dateLabel={dateLabel}
+            isToday={isToday}
+          />
           <QuickMealActions
             onSmartParse={onOpenSmartParser}
             onParseAI={onFocusParser}
@@ -101,7 +76,7 @@ export function MealContent({
           />
           <MealTips />
         </aside>
-      </section>
+      </div>
     </div>
   )
 }
