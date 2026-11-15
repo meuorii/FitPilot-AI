@@ -3,7 +3,7 @@
 ## Architecture and boundaries
 
 - This repository contains separately managed `client/` (React/Vite), `server/` (Express/TypeScript), and `ai-service/` (FastAPI/Python) applications. There is no root package workspace. Preserve that arrangement unless a separately approved architecture change says otherwise.
-- `mobile/` is a planned additional native client. The web app remains a supported production client and the backend remains the authority for shared account data.
+- `mobile/` is an independently managed Expo SDK 58 native client beside the existing web, Express, and FastAPI applications. The web app remains supported and the backend remains authoritative for shared account data.
 - Keep changes within the requested application or documentation scope. Do not reorganize apps, introduce a shared package, or edit unrelated user work.
 
 ## Preservation and API safety
@@ -15,7 +15,7 @@
 
 ## Mobile requirements
 
-- The planned application is native React Native with Expo Router, TypeScript, and Expo SDK 54 unless the user explicitly changes the target. Follow the matching SDK 54 dependency manifest and documentation; do not install latest versions by habit.
+- The planned application is native React Native with Expo Router, TypeScript, and Expo SDK 58 unless the user explicitly changes the target. Follow the SDK 58 dependency manifest and versioned documentation; do not install latest versions by habit.
 - Keep the new app independently buildable under `mobile/`; native dependencies belong in that app. Do not introduce WebViews as the screen architecture or force web-only APIs into native code.
 - Preserve FitPilot's brand and existing Rocco illustrations. Mobile layouts must be designed for safe areas, touch, system text scaling, platform back behavior, and accessible labels.
 - Secure mobile credentials with `expo-secure-store`; browser storage APIs are not a native persistence strategy.

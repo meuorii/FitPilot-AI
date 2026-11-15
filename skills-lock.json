@@ -49,6 +49,12 @@
       "skillPath": "plugins/expo/skills/expo-router/SKILL.md",
       "computedHash": "f55ddba2949896d787741a5e11a8180077ed588465dafbe9f4195706e77631ba"
     },
+    "expo-upgrade": {
+      "source": "expo/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-upgrade/SKILL.md",
+      "computedHash": "d5fe509bcc006489f024d47a6be9148674bea810610901fdd401c0400bc29f83"
+    },
     "expo-web-to-native": {
       "source": "expo/skills",
       "sourceType": "github",
