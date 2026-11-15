@@ -5,6 +5,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from 'react-native';
 import { AuthBootstrapProvider } from '@/lib/auth/auth-provider';
+import { OnboardingDraftProvider } from '@/lib/onboarding/onboarding-draft';
+import { AccountDraftBoundary } from '@/lib/onboarding/account-draft-boundary';
 import { queryClient } from '@/lib/query/query-client';
 import { QueryRuntime } from '@/lib/query/query-runtime';
 import { palette } from '@/theme';
@@ -34,7 +36,7 @@ export function AppProviders({ children }: PropsWithChildren) {
         <ThemeProvider value={navigationTheme}>
           <QueryClientProvider client={queryClient}>
             <QueryRuntime>
-              <AuthBootstrapProvider>{children}</AuthBootstrapProvider>
+              <AuthBootstrapProvider><OnboardingDraftProvider><AccountDraftBoundary>{children}</AccountDraftBoundary></OnboardingDraftProvider></AuthBootstrapProvider>
             </QueryRuntime>
           </QueryClientProvider>
         </ThemeProvider>

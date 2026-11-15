@@ -11,7 +11,7 @@ An independently managed native Expo app alongside `client/`, `server/`, and `ai
    Copy-Item .env.example .env.local
    ```
 
-2. Set `EXPO_PUBLIC_API_BASE_URL` in `.env.local` to the existing Express API's public base URL ending in `/api/v1`. Keep secrets out of all `EXPO_PUBLIC_` variables. The Phase 2 preview does not make API calls, so the value can remain blank until a later feature needs it.
+2. Set `EXPO_PUBLIC_API_BASE_URL` in `.env.local` to the existing Express API prefix ending in `/api/v1` (for example, `https://api.example.com/api/v1`). Keep secrets out of all `EXPO_PUBLIC_` variables. The client validates this prefix before making requests.
 
 3. Start Expo Go mode:
 
@@ -46,4 +46,4 @@ npm run start:clear -- --go --lan
 
 In development, `/` opens the five-tab preview shell. Its banner and route shortcuts clearly label the preview; no login is simulated, no token is created, and no user fitness values are fabricated. Non-development `/` redirects to the login placeholder until Phase 3 implements authentication.
 
-See [`../docs/mobile/PHASE_02_FOUNDATION.md`](../docs/mobile/PHASE_02_FOUNDATION.md) for implemented architecture, compatibility evidence, device limitations, and the Phase 3 handoff.
+See [`../docs/mobile/PHASE_03_AUTH_ONBOARDING.md`](../docs/mobile/PHASE_03_AUTH_ONBOARDING.md) for the current authentication and onboarding behavior and device limitations.

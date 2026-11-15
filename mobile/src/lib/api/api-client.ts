@@ -21,6 +21,13 @@ type ApiRequestOptions = Omit<RequestInit, 'body' | 'signal'> & {
   authenticated?: boolean;
 };
 
+type UnauthorizedHandler = (token: string) => Promise<void> | void;
+let unauthorizedHandler: UnauthorizedHandler | undefined;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | undefined) {
+  unauthorizedHandler = handler;
+}
+
 function apiBaseUrl() {
   const raw = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
   if (!raw) throw new Error('Set EXPO_PUBLIC_API_BASE_URL to the Express API base URL before making requests.');
@@ -29,6 +36,10 @@ function apiBaseUrl() {
     parsed = new URL(raw);
   } catch {
     throw new Error('EXPO_PUBLIC_API_BASE_URL must be a valid absolute URL.');
+  }
+  const normalizedPath = parsed.pathname.replace(/\/+$/, '');
+  if (!normalizedPath.endsWith('/api/v1') || parsed.search || parsed.hash) {
+    throw new Error('EXPO_PUBLIC_API_BASE_URL must point to the Express API prefix and end in /api/v1.');
   }
   const host = parsed.hostname.replace(/^\[|\]$/g, '');
   const localHost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
@@ -42,7 +53,7 @@ function apiBaseUrl() {
   if (parsed.protocol !== 'https:' && !(__DEV__ && (localHost || privateIpv4))) {
     throw new Error('The API base URL must use HTTPS, except for local or private-LAN development hosts.');
   }
-  return raw.replace(/\/+$/, '');
+  return `${parsed.origin}${normalizedPath}`;
 }
 
 function isFormData(body: unknown): body is FormData {
@@ -59,6 +70,7 @@ function getErrorFields(body: unknown): { message?: string; code?: string } {
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { body, signal, timeoutMs = 15_000, authenticated = true, headers: inputHeaders, ...requestOptions } = options;
   const controller = new AbortController();
+  let requestToken: string | null = null;
   let timedOut = false;
   const timeout = setTimeout(() => {
     timedOut = true;
@@ -73,8 +85,8 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     headers.set('Accept', 'application/json');
     headers.set('x-timezone-offset-minutes', String(-new Date().getTimezoneOffset()));
     if (authenticated) {
-      const token = await secureTokenStore.get();
-      if (token) headers.set('Authorization', `Bearer ${token}`);
+      requestToken = await secureTokenStore.get();
+      if (requestToken) headers.set('Authorization', `Bearer ${requestToken}`);
     }
 
     let requestBody: BodyInit | undefined;
@@ -109,6 +121,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
     if (!response.ok) {
       const fields = getErrorFields(responseBody);
+      if (response.status === 401 && requestToken && unauthorizedHandler) {
+        await Promise.resolve(unauthorizedHandler(requestToken)).catch(() => undefined);
+      }
       throw new ApiError(fields.message ?? `The request failed (${response.status}).`, response.status, responseBody, fields.code);
     }
     if (!responseText) return undefined as T;

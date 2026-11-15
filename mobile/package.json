@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "test:auth": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test src/lib/auth/auth-validation.test.mjs",
     "doctor": "npx expo-doctor@latest",
     "dependencies:check": "expo install --check"
   },
