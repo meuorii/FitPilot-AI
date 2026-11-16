@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/app-text';
 import { AppButton } from '@/components/ui/app-button';
 import { RoccoImage } from '@/components/mascot/rocco-image';
 import { OnboardingProgress } from '@/components/layout/onboarding-progress';
+import { Entrance } from '@/components/motion/entrance';
 import { useAppColors, radius, spacing } from '@/theme';
 import { useAuth } from '@/lib/auth/auth-provider';
 
@@ -15,8 +16,8 @@ export default function OnboardingWelcomeScreen() {
   return (
     <AppScreen safeTop safeBottom>
       <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between', padding: spacing.xl, gap: spacing.xxl }}>
-        <OnboardingProgress step={1} />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: spacing.xl }}>
+        <Entrance><OnboardingProgress step={1} /></Entrance>
+        <Entrance delay={55} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: spacing.xl }}>
           <View style={{ width: '100%', maxWidth: 360, minHeight: 230, alignItems: 'center', justifyContent: 'center', borderRadius: radius.xl, backgroundColor: colors.surfaceTint, borderCurve: 'continuous' }}>
             <RoccoImage variant="workout" width={220} height={230} decorative />
           </View>
@@ -24,8 +25,8 @@ export default function OnboardingWelcomeScreen() {
             <AppText variant="display">Your fitness journey starts here.</AppText>
             <AppText variant="body" tone="secondary">Tell us a little about yourself. We’ll help you build a plan around your goals.</AppText>
           </View>
-        </View>
-        <AppButton label="Continue" onPress={() => router.push('/(onboarding)/about-you')} />
+        </Entrance>
+        <Entrance delay={110}><AppButton label="Continue" onPress={() => router.push('/(onboarding)/about-you')} /></Entrance>
       </ScrollView>
     </AppScreen>
   );

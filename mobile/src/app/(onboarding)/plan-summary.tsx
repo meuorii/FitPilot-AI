@@ -7,6 +7,7 @@ import { AppButton } from '@/components/ui/app-button';
 import { AppCard } from '@/components/ui/app-card';
 import { RoccoImage } from '@/components/mascot/rocco-image';
 import { OnboardingProgress } from '@/components/layout/onboarding-progress';
+import { Entrance } from '@/components/motion/entrance';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { useOnboardingDraft } from '@/lib/onboarding/onboarding-draft';
 import { spacing } from '@/theme';
@@ -45,21 +46,21 @@ export default function PlanSummaryScreen() {
     <AppScreen safeTop safeBottom>
       <Stack.Screen options={{ gestureEnabled: false }} />
       <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, padding: spacing.xl, paddingBottom: spacing.xxl, gap: spacing.xl }}>
-        <OnboardingProgress step={4} />
-        <View style={{ alignItems: 'center', gap: spacing.sm }}>
+        <Entrance><OnboardingProgress step={4} /></Entrance>
+        <Entrance delay={55} style={{ alignItems: 'center', gap: spacing.sm }}>
           <RoccoImage variant="progress" width={132} height={150} decorative />
           <AppText variant="display" align="center">Your plan is ready.</AppText>
           <AppText variant="secondary" tone="secondary" align="center">Your starting goals are set. Let’s make every session count.</AppText>
-        </View>
-        <AppCard inset="lg">
+        </Entrance>
+        <Entrance delay={95}><AppCard inset="lg">
           <View style={{ gap: spacing.lg }}>
             {completedGoal ? <View style={{ gap: spacing.xs }}><AppText variant="caption" tone="secondary">YOUR GOAL</AppText><AppText variant="sectionTitle">{completedGoal}</AppText></View> : null}
             {metrics.length > 0 ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
               {metrics.map((metric) => <View key={metric.label} style={{ width: '46%', minHeight: 68, justifyContent: 'center', gap: spacing.xxs }}><AppText variant="caption" tone="secondary">{metric.label}</AppText><AppText variant="cardTitle">{metric.value}</AppText></View>)}
             </View> : <AppText variant="secondary" tone="secondary">Your profile is saved. Nutrition targets will appear when FitPilot provides them.</AppText>}
           </View>
-        </AppCard>
-        <AppButton label="Go to Dashboard" onPress={enterDashboard} />
+        </AppCard></Entrance>
+        <Entrance delay={135}><AppButton label="Go to Dashboard" onPress={enterDashboard} /></Entrance>
       </ScrollView>
     </AppScreen>
   );

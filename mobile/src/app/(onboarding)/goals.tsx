@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import * as Haptics from 'expo-haptics';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import { AppScreen } from '@/components/layout/app-screen';
 import { AppText } from '@/components/ui/app-text';
 import { AppButton } from '@/components/ui/app-button';
 import { OnboardingProgress } from '@/components/layout/onboarding-progress';
+import { Entrance } from '@/components/motion/entrance';
 import { authApi } from '@/lib/auth/auth-api';
 import { useAuth } from '@/lib/auth/auth-provider';
 import type { CompleteOnboardingRequest, PrimaryGoal } from '@/lib/auth/auth-types';
@@ -80,16 +82,17 @@ export default function OnboardingGoalsScreen() {
   return (
     <AppScreen safeTop safeBottom>
       <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: spacing.xl, paddingBottom: spacing.xxl, gap: spacing.xl }}>
-        <OnboardingProgress step={3} />
-        <View style={{ gap: spacing.xs }}>
+        <Entrance><OnboardingProgress step={3} /></Entrance>
+        <Entrance delay={45} style={{ gap: spacing.xs }}>
           <AppText variant="display">Choose your direction.</AppText>
           <AppText variant="secondary" tone="secondary">Pick the goal that feels right. Targets below come from your FitPilot calculation.</AppText>
-        </View>
+        </Entrance>
+        <Entrance delay={80} style={{ gap: spacing.md }}>
         <View accessibilityRole="radiogroup" accessibilityLabel="Primary fitness goal" style={{ gap: spacing.md }}>
           {goalOptions.map((goal) => {
             const selected = goal.goal === selectedGoal?.goal;
             return (
-              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => selectGoal(goal)} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: selected ? 2 : 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
+              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); selectGoal(goal); }} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: selected ? 2 : 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm }}>
                   <View style={{ flex: 1, gap: spacing.xs }}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs }}>
@@ -116,11 +119,12 @@ export default function OnboardingGoalsScreen() {
             );
           })}
         </View>
+        </Entrance>
         {errorMessage || validationError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{validationError || errorMessage}</AppText> : null}
-        <View style={{ gap: spacing.sm }}>
+        <Entrance delay={120} style={{ gap: spacing.sm }}>
           <AppButton label={mutation.error ? 'Retry saving plan' : 'Save my plan'} loading={mutation.isPending} disabled={!selectedGoal || mutation.isPending} onPress={() => void saveAndContinue()} />
           <AppButton label="Previous" variant="quiet" disabled={mutation.isPending} onPress={() => router.replace('/(onboarding)/about-you')} />
-        </View>
+        </Entrance>
       </ScrollView>
     </AppScreen>
   );

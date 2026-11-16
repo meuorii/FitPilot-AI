@@ -1,6 +1,6 @@
 # FitPilot AI Mobile Roadmap
 
-Status reflects repository evidence as of 2026-11-15. Phase 1 is documented, Phase 2's native foundation is implemented, and Phase 3 authentication/onboarding is implemented with physical-device and safe-backend validation pending.
+Status reflects repository evidence as of 2026-11-15. Phase 1 is documented, Phase 2's native foundation is implemented, Phase 3 authentication/onboarding and the pre-Phase 4 white-theme/auth/welcome refinement are implemented, and physical-device plus safe-backend validation remain pending.
 
 | Phase | Status | Objective and deliverables | Depends on / gate |
 |---|---|---|---|
@@ -13,6 +13,10 @@ Status reflects repository evidence as of 2026-11-15. Phase 1 is documented, Pha
 | 7. AI Coach, Progress & Settings | Not started | Coach context/chat, progress charts/check-ins, account/profile/preferences/security settings. | Phases 2–3; confirm unsupported mutations or contract drift before promising parity. Accept with chat errors, log edit/delete, settings save failures, and privacy checks. |
 | 8. Motion, UX Polish & Performance | Not started | Accessibility, platform polish, purposeful motion/haptics, image/performance refinement, reduced motion, long-content behavior. | Phases 3–7; assess in release builds on supported low-end Android and iOS hardware. Accept only after device feel and accessibility review. |
 | 9. Integration Testing & Final QA | Not started | End-to-end parity, backend integration, regression, release readiness, operational notes. | Phases 1–8; device matrix, test accounts, API access, and QA plan. Accept after documented Android/iOS flows and web/backend preservation checks. |
+
+## Pre-Phase 4 refinement checkpoint
+
+The mobile app now uses a fixed white-first theme and an interactive Rocco welcome for signed-out users. Login, registration, email verification, and the existing onboarding screens received focused layout and motion refinements. Auth/session semantics, server calculations, app boundaries, and the nine-phase numbering are preserved. TypeScript, lint, the existing auth regression tests, SDK dependency validation, Expo Doctor (20/20), and iOS/Android exports pass. Physical-device visual/accessibility checks and safe staging auth flows remain pending. See [PRE_PHASE_04_UI_REFINEMENT.md](docs/mobile/PRE_PHASE_04_UI_REFINEMENT.md). Phase 4 remains not started.
 
 ## Recommended skill routing
 

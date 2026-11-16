@@ -6,6 +6,7 @@ import { AppTextField } from '@/components/ui/app-text-field';
 import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
 import { RoccoImage } from '@/components/mascot/rocco-image';
+import { Entrance } from '@/components/motion/entrance';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { authApi } from '@/lib/auth/auth-api';
 import { ApiError } from '@/lib/api/api-client';
@@ -63,22 +64,22 @@ export default function LoginScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
           <View style={{ alignItems: 'center', gap: spacing.sm }}>
-            <RoccoImage variant="coachAvatar" width={96} height={96} decorative />
-            <AppText variant="display" align="center">Welcome back.</AppText>
-            <AppText variant="secondary" tone="secondary" align="center">Pick up where you left off. Your next step starts here.</AppText>
+            <Entrance><RoccoImage variant="coachAvatar" width={104} height={104} decorative /></Entrance>
+            <Entrance delay={55}><AppText variant="display" align="center">Welcome back.</AppText></Entrance>
+            <Entrance delay={100}><AppText variant="secondary" tone="secondary" align="center">Every step counts. Pick up where you left off.</AppText></Entrance>
           </View>
 
           <View style={{ gap: spacing.lg }}>
             {notice ? <AppText accessibilityRole="alert" variant="secondary" tone="secondary">{notice}</AppText> : null}
             {requestError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{requestError}</AppText> : null}
-            <AppTextField label="Email" value={email} onChangeText={(value) => { setEmail(value); setEmailError(''); clearNotice(); }} error={emailError} placeholder="you@example.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" returnKeyType="next" onSubmitEditing={() => passwordField.current?.focus()} importantForAutofill="yes" />
-            <AppTextField ref={passwordField} label="Password" value={password} onChangeText={(value) => { setPassword(value); setPasswordError(''); }} error={passwordError} secure autoCapitalize="none" autoCorrect={false} textContentType="password" autoComplete="current-password" returnKeyType="go" onSubmitEditing={() => void submit()} />
-            <AppButton label="Sign in" loading={pending} disabled={pending} onPress={() => void submit()} />
+            <Entrance delay={120}><AppTextField label="Email" value={email} onChangeText={(value) => { setEmail(value); setEmailError(''); clearNotice(); }} error={emailError} placeholder="you@example.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" returnKeyType="next" onSubmitEditing={() => passwordField.current?.focus()} importantForAutofill="yes" /></Entrance>
+            <Entrance delay={160}><AppTextField ref={passwordField} label="Password" value={password} onChangeText={(value) => { setPassword(value); setPasswordError(''); }} error={passwordError} secure autoCapitalize="none" autoCorrect={false} textContentType="password" autoComplete="current-password" returnKeyType="go" onSubmitEditing={() => void submit()} /></Entrance>
+            <Entrance delay={200}><AppButton label="Sign in" loading={pending} disabled={pending} onPress={() => void submit()} /></Entrance>
             <AppText variant="caption" tone="secondary" align="center">Password reset is not available yet.</AppText>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: spacing.xs }}>
+            <Entrance delay={240} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: spacing.xs }}>
               <AppText variant="secondary" tone="secondary">New to FitPilot?</AppText>
               <AppButton label="Create account" variant="quiet" onPress={() => router.push('/(auth)/register')} />
-            </View>
+            </Entrance>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -14,13 +14,16 @@ type AppTextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
 export const AppTextField = forwardRef<TextInputInstance, AppTextFieldProps>(function AppTextField({ label, error, hint, secure = false, style, ...props }, ref) {
   const colors = useAppColors();
   const [visible, setVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: spacing.xs }}>
       <AppText variant="secondary" style={{ fontWeight: '600' }}>{label}</AppText>
-      <View style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: error ? colors.error : colors.border, borderRadius: radius.md, borderCurve: 'continuous', backgroundColor: colors.surface }}>
+      <View style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: focused && !error ? 1.5 : 1, borderColor: error ? colors.error : focused ? colors.focus : colors.border, borderRadius: radius.md, borderCurve: 'continuous', backgroundColor: colors.surface }}>
         <TextInput
           ref={ref}
           {...props}
+          onFocus={(event) => { setFocused(true); props.onFocus?.(event); }}
+          onBlur={(event) => { setFocused(false); props.onBlur?.(event); }}
           accessibilityLabel={label}
           accessibilityHint={error ?? hint}
           secureTextEntry={secure && !visible}

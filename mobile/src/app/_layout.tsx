@@ -17,7 +17,7 @@ function AppStack() {
         <Stack.Protected guard={status === 'signedInOnboarding' || status === 'signedInSummary'}><Stack.Screen name="(onboarding)" /></Stack.Protected>
         <Stack.Protected guard={status === 'signedInReady'}><Stack.Screen name="(app)" /></Stack.Protected>
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </>
   );
 }

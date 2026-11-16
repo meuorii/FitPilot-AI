@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect, type Href } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { AppScreen } from '@/components/layout/app-screen';
 import { AppButton } from '@/components/ui/app-button';
@@ -10,7 +10,7 @@ import { spacing } from '@/theme';
 
 export default function IndexRoute() {
   const { status, notice, retrySession, logout } = useAuth();
-  if (status === 'signedOut' || status === 'sessionExpired') return <Redirect href="/(auth)/login" />;
+  if (status === 'signedOut' || status === 'sessionExpired') return <Redirect href={'/(auth)/welcome' as Href} />;
   if (status === 'verificationPending') return <Redirect href="/(verification)/email" />;
   if (status === 'signedInOnboarding') return <Redirect href="/(onboarding)/welcome" />;
   if (status === 'signedInSummary') return <Redirect href="/(onboarding)/plan-summary" />;
