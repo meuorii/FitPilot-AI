@@ -30,16 +30,16 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler | undefined)
 
 function apiBaseUrl() {
   const raw = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
-  if (!raw) throw new Error('Set EXPO_PUBLIC_API_BASE_URL to the Express API base URL before making requests.');
+  if (!raw) throw new ApiError('EXPO_PUBLIC_API_BASE_URL is missing.', 0, undefined, 'API_CONFIGURATION_ERROR');
   let parsed: URL;
   try {
     parsed = new URL(raw);
   } catch {
-    throw new Error('EXPO_PUBLIC_API_BASE_URL must be a valid absolute URL.');
+    throw new ApiError('EXPO_PUBLIC_API_BASE_URL must be a valid absolute URL.', 0, undefined, 'API_CONFIGURATION_ERROR');
   }
   const normalizedPath = parsed.pathname.replace(/\/+$/, '');
-  if (!normalizedPath.endsWith('/api/v1') || parsed.search || parsed.hash) {
-    throw new Error('EXPO_PUBLIC_API_BASE_URL must point to the Express API prefix and end in /api/v1.');
+  if (!normalizedPath.endsWith('/api/v1') || parsed.search || parsed.hash || parsed.username || parsed.password) {
+    throw new ApiError('EXPO_PUBLIC_API_BASE_URL must be a credential-free Express API URL ending in /api/v1, without query or fragment.', 0, undefined, 'API_CONFIGURATION_ERROR');
   }
   const host = parsed.hostname.replace(/^\[|\]$/g, '');
   const localHost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
@@ -51,9 +51,18 @@ function apiBaseUrl() {
     (ipv4Parts[0] === 172 && ipv4Parts[1] >= 16 && ipv4Parts[1] <= 31)
   );
   if (parsed.protocol !== 'https:' && !(__DEV__ && (localHost || privateIpv4))) {
-    throw new Error('The API base URL must use HTTPS, except for local or private-LAN development hosts.');
+    throw new ApiError('The API base URL must use HTTPS, except for local or private-LAN development hosts.', 0, undefined, 'API_CONFIGURATION_ERROR');
   }
   return `${parsed.origin}${normalizedPath}`;
+}
+
+function diagnosticPath(path: string) {
+  return path.split(/[?#]/, 1)[0] || '/';
+}
+
+function logApiDiagnostic(details: { category: string; path: string; origin?: string; status?: number; reason?: string }) {
+  if (!__DEV__) return;
+  console.warn('[FitPilot API]', details);
 }
 
 function isFormData(body: unknown): body is FormData {
@@ -69,6 +78,19 @@ function getErrorFields(body: unknown): { message?: string; code?: string } {
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { body, signal, timeoutMs = 15_000, authenticated = true, headers: inputHeaders, ...requestOptions } = options;
+  // Validate configuration before entering the transport catch; a bad URL is not a network failure.
+  let baseUrl: string;
+  try {
+    baseUrl = apiBaseUrl();
+  } catch (error) {
+    logApiDiagnostic({
+      category: 'configuration',
+      path: diagnosticPath(path),
+      reason: error instanceof Error ? error.message : 'Invalid API configuration',
+    });
+    throw error;
+  }
+  const requestUrl = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const controller = new AbortController();
   let requestToken: string | null = null;
   let timedOut = false;
@@ -101,7 +123,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
     let response: Response;
     try {
-      response = await fetch(`${apiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`, {
+      response = await fetch(requestUrl, {
         ...requestOptions,
         headers,
         body: requestBody,
@@ -109,10 +131,27 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       });
     } catch (error) {
       if (signal?.aborted) throw error;
-      if (timedOut) throw new ApiError('The request timed out. Try again when your connection is stable.', 0, undefined, 'TIMEOUT');
-      throw new ApiError('Unable to reach FitPilot. Check your connection and try again.', 0, undefined, 'NETWORK_ERROR');
+      const reason = error instanceof Error ? error.name : 'UnknownError';
+      if (timedOut) {
+        logApiDiagnostic({ category: 'timeout', origin: new URL(baseUrl).origin, path: diagnosticPath(path), reason });
+        throw new ApiError('The request timed out.', 0, undefined, 'TIMEOUT');
+      }
+      logApiDiagnostic({ category: 'transport', origin: new URL(baseUrl).origin, path: diagnosticPath(path), reason });
+      throw new ApiError('The request could not reach the configured server.', 0, undefined, 'NETWORK_ERROR');
     }
-    const responseText = await response.text();
+    let responseText: string;
+    try {
+      responseText = await response.text();
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      const reason = error instanceof Error ? error.name : 'UnknownError';
+      if (timedOut) {
+        logApiDiagnostic({ category: 'timeout', origin: new URL(baseUrl).origin, path: diagnosticPath(path), reason });
+        throw new ApiError('The request timed out.', 0, undefined, 'TIMEOUT');
+      }
+      logApiDiagnostic({ category: 'transport', origin: new URL(baseUrl).origin, path: diagnosticPath(path), reason });
+      throw new ApiError('The server response could not be received completely.', 0, undefined, 'NETWORK_ERROR');
+    }
     let responseBody: unknown;
     if (responseText) {
       try { responseBody = JSON.parse(responseText) as unknown; }
@@ -121,13 +160,17 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
     if (!response.ok) {
       const fields = getErrorFields(responseBody);
+      logApiDiagnostic({ category: 'http', origin: new URL(baseUrl).origin, path: diagnosticPath(path), status: response.status });
       if (response.status === 401 && requestToken && unauthorizedHandler) {
         await Promise.resolve(unauthorizedHandler(requestToken)).catch(() => undefined);
       }
       throw new ApiError(fields.message ?? `The request failed (${response.status}).`, response.status, responseBody, fields.code);
     }
     if (!responseText) return undefined as T;
-    if (typeof responseBody === 'string') throw new ApiError('The server returned an unreadable response.', response.status, responseBody);
+    if (typeof responseBody === 'string') {
+      logApiDiagnostic({ category: 'response', origin: new URL(baseUrl).origin, path: diagnosticPath(path), status: response.status });
+      throw new ApiError('The server returned an unreadable response.', response.status, responseBody, 'INVALID_RESPONSE');
+    }
     return responseBody as T;
   } finally {
     clearTimeout(timeout);

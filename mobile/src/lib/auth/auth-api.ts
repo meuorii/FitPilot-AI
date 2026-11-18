@@ -66,8 +66,10 @@ function authMessage(error: unknown, fallback: string): string {
     case 'VERIFICATION_CODE_EXPIRED': return 'That code has expired. Request a new code to continue.';
     case 'NO_ACTIVE_VERIFICATION_CODE': return 'There is no active code for this email. Request a new one.';
     case 'EMAIL_SERVICE_UNAVAILABLE': return 'FitPilot could not send the verification email. Please try again later.';
-    case 'TIMEOUT':
-    case 'NETWORK_ERROR': return 'FitPilot could not be reached. Check your connection and try again.';
+    case 'API_CONFIGURATION_ERROR': return "FitPilot's development connection is not configured correctly.";
+    case 'TIMEOUT': return 'The server is taking longer than expected. Please try again.';
+    case 'NETWORK_ERROR': return 'FitPilot could not connect to the server. Check the connection and try again.';
+    case 'INVALID_RESPONSE': return 'FitPilot received an unexpected response. Please try again shortly.';
     default:
       if (error.status === 401) return 'The email or password is incorrect.';
       if (error.status === 403) return 'This account cannot continue yet. Check your email verification and try again.';
