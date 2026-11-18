@@ -5,7 +5,7 @@ import { AppScreen } from '@/components/layout/app-screen';
 import { AppTextField } from '@/components/ui/app-text-field';
 import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
-import { RoccoImage } from '@/components/mascot/rocco-image';
+import { AuthHero } from '@/components/mascot/auth-hero';
 import { Entrance } from '@/components/motion/entrance';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { authApi } from '@/lib/auth/auth-api';
@@ -62,14 +62,13 @@ export default function LoginScreen() {
   return (
     <AppScreen safeTop safeBottom>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
-          <View style={{ alignItems: 'flex-start', gap: spacing.xs }}>
-            <Entrance><RoccoImage variant="login" width={176} height={176} decorative /></Entrance>
-            <Entrance delay={55}><AppText variant="display">Welcome back.</AppText></Entrance>
-            <Entrance delay={100}><AppText variant="secondary" tone="secondary">Every step counts. Pick up where you left off.</AppText></Entrance>
-          </View>
-
-          <View style={{ gap: spacing.lg }}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.xl }}>
+          <AuthHero variant="login" />
+          <View style={{ marginTop: -spacing.lg, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, paddingBottom: spacing.lg, gap: spacing.lg, backgroundColor: '#FFFFFF', borderTopLeftRadius: 28, borderTopRightRadius: 28 }}>
+            <View style={{ gap: spacing.xs }}>
+              <Entrance delay={45}><AppText variant="display">Welcome back.</AppText></Entrance>
+              <Entrance delay={85}><AppText variant="secondary" tone="secondary">Every step counts. Pick up where you left off.</AppText></Entrance>
+            </View>
             {notice ? <AppText accessibilityRole="alert" variant="secondary" tone="secondary">{notice}</AppText> : null}
             {requestError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{requestError}</AppText> : null}
             <Entrance delay={120}><AppTextField label="Email" value={email} onChangeText={(value) => { setEmail(value); setEmailError(''); clearNotice(); }} error={emailError} placeholder="you@example.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" returnKeyType="next" onSubmitEditing={() => passwordField.current?.focus()} importantForAutofill="yes" /></Entrance>

@@ -8,7 +8,7 @@ import { useAppColors, radius, spacing } from '@/theme';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { authApi } from '@/lib/auth/auth-api';
 import { authenticatedDestination } from '@/lib/auth/auth-validation';
-import { RoccoImage } from '@/components/mascot/rocco-image';
+import { AuthHero } from '@/components/mascot/auth-hero';
 import { Entrance } from '@/components/motion/entrance';
 import Animated, { FadeIn, useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
@@ -102,15 +102,14 @@ export default function EmailVerificationScreen() {
   return (
     <AppScreen safeTop safeBottom>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
-          <View style={{ alignItems: 'center', gap: spacing.md }}>
-            <Entrance><RoccoImage variant="emailVerification" width={156} height={156} decorative /></Entrance>
-            <Entrance delay={55}><AppText variant="display" align="center">Check your email.</AppText></Entrance>
-            <Entrance delay={95}><AppText variant="secondary" tone="secondary" align="center">Enter the six-digit code sent to</AppText></Entrance>
-            <Entrance delay={125}><AppText variant="cardTitle" align="center" selectable>{verificationEmail}</AppText></Entrance>
-          </View>
-
-          <View style={{ gap: spacing.lg }}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.xl }}>
+          <AuthHero variant="emailVerification" compact />
+          <View style={{ marginTop: -spacing.lg, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, paddingBottom: spacing.lg, gap: spacing.lg, backgroundColor: '#FFFFFF', borderTopLeftRadius: 28, borderTopRightRadius: 28 }}>
+            <View style={{ gap: spacing.xs }}>
+              <Entrance delay={45}><AppText variant="display">Check your email.</AppText></Entrance>
+              <Entrance delay={85}><AppText variant="secondary" tone="secondary">Enter the six-digit code sent to</AppText></Entrance>
+              <Entrance delay={115}><AppText variant="cardTitle" selectable>{verificationEmail}</AppText></Entrance>
+            </View>
             {error ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{error}</AppText> : null}
             {message ? <AppText accessibilityRole="text" variant="secondary" tone="success">{message}</AppText> : null}
             <Animated.View style={[{ position: 'relative' }, codeMotion]}>
