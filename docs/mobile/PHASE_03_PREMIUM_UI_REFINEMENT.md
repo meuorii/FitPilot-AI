@@ -93,3 +93,15 @@ On an SDK 58-compatible Expo Go device, walk Welcome → Register → Verificati
 ## Phase 4 readiness
 
 **READY WITH CONDITIONS.** Phase 3 visual work is implemented and local source checks pass. Expo patch drift and physical-device/safe-backend acceptance remain open. Phase 4 remains not started.
+
+## 60/30/10 refinement
+
+The original centered form layouts left space above the portraits and exposed their waist-level source edge. Login and Registration now end the contained portrait at the start of the rounded form surface. Verification uses the same structure with a compact clipboard illustration and clearance below the artwork. The form column is capped on wide screens and scrolls with keyboard avoidance on compact screens.
+
+The existing theme owns the palette. `#F5F3F6` is the main canvas, `#DCD6DE` defines illustrated and grouped surfaces, and `#7482A4` marks progress. These are visual proportions. White on the brand accent measures 3.84:1, so primary buttons retain `#596783` with white labels at 5.69:1. Secondary copy was darkened for the tinted surfaces.
+
+Authentication Welcome frames the interactive full-body Rocco. Onboarding Welcome uses the same tint behind its dedicated illustration. About You gives each activity image a consistent tile. Goals preserve the radio marker and stable border width as selection changes. Plan Summary groups saved values on the tinted surface. Native navigation and existing form, OTP, and API handlers carry through.
+
+Entrance motion uses a brief opacity fade and skips it when Reduce Motion is enabled. Authentication inputs are presented together. Device review remains pending for keyboard scrolling, larger text, screen readers, artwork edges, and touch feedback on BlueStacks and iPhone.
+
+Refinement checks passed: npm run typecheck, npm run lint, npm run test:auth (5/5), and separate Android and iOS Expo Metro exports. Dependencies did not change. The native exports were checked with dotenv loading disabled, so they do not verify a live API connection.

@@ -65,3 +65,7 @@ The mobile API client now classifies invalid/missing development URL configurati
 - **Before Phase 5:** determine whether `/meals/parse-ai` (legacy Qwen) or `/meals/parse` (table/local DB/optional AI layered parser) is canonical for each entry point.
 - **Before Phase 6:** define whether rest alarms need to work while backgrounded/terminated; current web AudioContext/vibration behavior cannot be carried over.
 - Credential rotation, backend hardening, exact mobile designs, offline write queueing, health integrations, push notifications, store submission, and deployment changes are deferred. They require separate implementation scope or product decisions.
+
+## Pre-Phase 4 palette refinement
+
+Phase 3 authentication and onboarding now use the 60/30/10 palette and integrated Rocco surfaces. Native device acceptance remains pending. Phase 4 remains unstarted. See [the Phase 3 refinement report](docs/mobile/PHASE_03_PREMIUM_UI_REFINEMENT.md).

@@ -1,12 +1,12 @@
 export const palette = {
   light: {
-    background: '#FFFFFF',
+    background: '#F5F3F6',
     surface: '#FFFFFF',
     surfaceRaised: '#FFFFFF',
-    surfaceTint: '#F5F3F6',
+    surfaceTint: '#DCD6DE',
     text: '#38323F',
-    textSecondary: '#625D68',
-    textMuted: '#716B78',
+    textSecondary: '#595460',
+    textMuted: '#595460',
     accent: '#7482A4',
     accentStrong: '#596783',
     accentPressed: '#4C5873',

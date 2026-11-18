@@ -52,9 +52,9 @@ export default function PlanSummaryScreen() {
           <AppText variant="display" align="center">Your plan is ready.</AppText>
           <AppText variant="secondary" tone="secondary" align="center">Your starting goals are set. Let’s make every session count.</AppText>
         </Entrance>
-        <Entrance delay={95}><AppCard inset="lg">
+        <Entrance delay={95}><AppCard inset="lg" tint>
           <View style={{ gap: spacing.lg }}>
-            {completedGoal ? <View style={{ gap: spacing.xs }}><AppText variant="caption" tone="secondary">YOUR GOAL</AppText><AppText variant="sectionTitle">{completedGoal}</AppText></View> : null}
+            {completedGoal ? <View style={{ gap: spacing.xs }}><AppText variant="caption" tone="secondary">Your goal</AppText><AppText variant="sectionTitle">{completedGoal}</AppText></View> : null}
             {metrics.length > 0 ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
               {metrics.map((metric) => <View key={metric.label} style={{ width: '46%', minHeight: 68, justifyContent: 'center', gap: spacing.xxs }}><AppText variant="caption" tone="secondary">{metric.label}</AppText><AppText variant="cardTitle">{metric.value}</AppText></View>)}
             </View> : <AppText variant="secondary" tone="secondary">Your profile is saved. Nutrition targets will appear when FitPilot provides them.</AppText>}

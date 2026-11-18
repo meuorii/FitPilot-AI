@@ -9,11 +9,12 @@ import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
 import { RoccoImage } from '@/components/mascot/rocco-image';
 import { useAuth } from '@/lib/auth/auth-provider';
-import { spacing } from '@/theme';
+import { radius, spacing, useAppColors } from '@/theme';
 
 const phrases = ["You've got this!", 'Ready when you are!', 'One step at a time.', "Let's get moving!"];
 
 export default function AuthWelcomeScreen() {
+  const colors = useAppColors();
   const { notice, clearNotice } = useAuth();
   const { width: windowWidth } = useWindowDimensions();
   const mascotWidth = Math.min(320, windowWidth - spacing.xl * 2);
@@ -63,7 +64,7 @@ export default function AuthWelcomeScreen() {
 
         <View style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: spacing.xl }}>
           <Entrance delay={50} style={{ width: '100%', maxWidth: 420, alignItems: 'center' }}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Say hello to Rocco" accessibilityHint="Tap for a little encouragement." onPress={greet} style={({ pressed }) => ({ width: '100%', minHeight: 280, alignItems: 'center', justifyContent: 'center', transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }] })}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Say hello to Rocco" accessibilityHint="Tap for a little encouragement." onPress={greet} style={({ pressed }) => ({ width: '100%', paddingVertical: spacing.lg, backgroundColor: colors.surfaceTint, borderRadius: radius.xl, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }] })}>
               <Animated.View style={roccoMotion}>
                 <RoccoImage variant="welcome" width={mascotWidth} height={mascotWidth * 0.75} decorative />
               </Animated.View>

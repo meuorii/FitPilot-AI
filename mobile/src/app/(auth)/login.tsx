@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInputInstance } from 'react-native';
+import { View, type TextInputInstance } from 'react-native';
 import { router } from 'expo-router';
-import { AppScreen } from '@/components/layout/app-screen';
+import { AuthFormScreen } from '@/components/layout/auth-form-screen';
 import { AppTextField } from '@/components/ui/app-text-field';
 import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
-import { RoccoImage } from '@/components/mascot/rocco-image';
-import { Entrance } from '@/components/motion/entrance';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { authApi } from '@/lib/auth/auth-api';
 import { ApiError } from '@/lib/api/api-client';
@@ -60,29 +58,24 @@ export default function LoginScreen() {
   };
 
   return (
-    <AppScreen safeTop safeBottom>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
-          <View style={{ alignItems: 'flex-start', gap: spacing.xs }}>
-            <Entrance><RoccoImage variant="login" width={176} height={176} decorative /></Entrance>
-            <Entrance delay={55}><AppText variant="display">Welcome back.</AppText></Entrance>
-            <Entrance delay={100}><AppText variant="secondary" tone="secondary">Every step counts. Pick up where you left off.</AppText></Entrance>
-          </View>
+    <AuthFormScreen mascot="login">
+      <View style={{ alignItems: 'flex-start', gap: spacing.xs }}>
+        <View><AppText variant="display">Welcome back.</AppText></View>
+        <View><AppText variant="secondary" tone="secondary">Every step counts. Pick up where you left off.</AppText></View>
+      </View>
 
-          <View style={{ gap: spacing.lg }}>
-            {notice ? <AppText accessibilityRole="alert" variant="secondary" tone="secondary">{notice}</AppText> : null}
-            {requestError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{requestError}</AppText> : null}
-            <Entrance delay={120}><AppTextField label="Email" value={email} onChangeText={(value) => { setEmail(value); setEmailError(''); clearNotice(); }} error={emailError} placeholder="you@example.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" returnKeyType="next" onSubmitEditing={() => passwordField.current?.focus()} importantForAutofill="yes" /></Entrance>
-            <Entrance delay={160}><AppTextField ref={passwordField} label="Password" value={password} onChangeText={(value) => { setPassword(value); setPasswordError(''); }} error={passwordError} secure autoCapitalize="none" autoCorrect={false} textContentType="password" autoComplete="current-password" returnKeyType="go" onSubmitEditing={() => void submit()} /></Entrance>
-            <Entrance delay={200}><AppButton label="Sign in" loading={pending} disabled={pending} onPress={() => void submit()} /></Entrance>
-            <AppText variant="caption" tone="secondary" align="center">Password reset is not available yet.</AppText>
-            <Entrance delay={240} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: spacing.xs }}>
-              <AppText variant="secondary" tone="secondary">New to FitPilot?</AppText>
-              <AppButton label="Create account" variant="quiet" onPress={() => router.push('/(auth)/register')} />
-            </Entrance>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </AppScreen>
+      <View style={{ gap: spacing.lg }}>
+        {notice ? <AppText accessibilityRole="alert" variant="secondary" tone="secondary">{notice}</AppText> : null}
+        {requestError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{requestError}</AppText> : null}
+        <View><AppTextField label="Email" value={email} onChangeText={(value) => { setEmail(value); setEmailError(''); clearNotice(); }} error={emailError} placeholder="you@example.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" returnKeyType="next" onSubmitEditing={() => passwordField.current?.focus()} importantForAutofill="yes" /></View>
+        <View><AppTextField ref={passwordField} label="Password" value={password} onChangeText={(value) => { setPassword(value); setPasswordError(''); }} error={passwordError} secure autoCapitalize="none" autoCorrect={false} textContentType="password" autoComplete="current-password" returnKeyType="go" onSubmitEditing={() => void submit()} /></View>
+        <View><AppButton label="Sign in" loading={pending} disabled={pending} onPress={() => void submit()} /></View>
+        <AppText variant="caption" tone="secondary" align="center">Password reset is not available yet.</AppText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: spacing.xs }}>
+          <AppText variant="secondary" tone="secondary">New to FitPilot?</AppText>
+          <AppButton label="Create account" variant="quiet" onPress={() => router.push('/(auth)/register')} />
+        </View>
+      </View>
+    </AuthFormScreen>
   );
 }

@@ -92,7 +92,7 @@ export default function OnboardingGoalsScreen() {
           {goalOptions.map((goal) => {
             const selected = goal.goal === selectedGoal?.goal;
             return (
-              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); selectGoal(goal); }} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: selected ? 2 : 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
+              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); selectGoal(goal); }} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm }}>
                   <View style={{ flex: 1, gap: spacing.xs }}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs }}>

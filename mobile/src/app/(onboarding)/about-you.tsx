@@ -106,7 +106,9 @@ export default function AboutYouScreen() {
               const selected = aboutYou.activity_level === option.value;
               return (
                 <Pressable key={option.value} accessibilityRole="radio" accessibilityLabel={`${option.label}. ${option.description} ${option.frequency}`} accessibilityState={{ selected }} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); updateAboutYou('activity_level', option.value); setErrors((old) => ({ ...old, activity_level: '' })); }} style={({ pressed }) => ({ minHeight: 104, flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md, borderRadius: radius.md, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.82 : 1 })}>
-                  <RoccoImage variant={option.image} width={62} height={78} decorative />
+                  <View style={{ backgroundColor: selected ? colors.background : colors.surfaceTint, borderRadius: radius.sm, padding: spacing.xxs }}>
+                    <RoccoImage variant={option.image} width={54} height={68} decorative />
+                  </View>
                   <View style={{ flex: 1, gap: spacing.xxs }}><AppText variant="cardTitle">{option.label}</AppText><AppText variant="caption" tone="secondary">{option.description}</AppText><AppText variant="caption" tone="accent">{option.frequency}</AppText></View>
                   <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: 22, height: 22, borderWidth: 2, borderColor: selected ? colors.accentStrong : colors.border, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' }}>{selected ? <View style={{ width: 10, height: 10, borderRadius: radius.pill, backgroundColor: colors.accentStrong }} /> : null}</View>
                 </Pressable>
