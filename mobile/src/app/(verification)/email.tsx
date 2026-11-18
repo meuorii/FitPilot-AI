@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
 import { router, Redirect } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { AppScreen } from '@/components/layout/app-screen';
 import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
@@ -105,7 +104,7 @@ export default function EmailVerificationScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
           <View style={{ alignItems: 'center', gap: spacing.md }}>
-            <Entrance><View style={{ alignItems: 'center', justifyContent: 'center' }}><RoccoImage variant="coachAvatar" width={92} height={92} decorative /><View style={{ position: 'absolute', right: -spacing.xs, bottom: 0, width: 36, height: 36, borderRadius: radius.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="mail-open-outline" size={21} color={colors.accentStrong} /></View></View></Entrance>
+            <Entrance><RoccoImage variant="emailVerification" width={156} height={156} decorative /></Entrance>
             <Entrance delay={55}><AppText variant="display" align="center">Check your email.</AppText></Entrance>
             <Entrance delay={95}><AppText variant="secondary" tone="secondary" align="center">Enter the six-digit code sent to</AppText></Entrance>
             <Entrance delay={125}><AppText variant="cardTitle" align="center" selectable>{verificationEmail}</AppText></Entrance>

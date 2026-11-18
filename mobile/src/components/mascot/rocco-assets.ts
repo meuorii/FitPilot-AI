@@ -1,4 +1,15 @@
 export const roccoAssets = {
+  welcome: require('../../../assets/images/authentication-onboarding/welcome.png') as number,
+  interactiveWelcome: require('../../../assets/images/authentication-onboarding/interactive-welcome.png') as number,
+  login: require('../../../assets/images/authentication-onboarding/login.png') as number,
+  register: require('../../../assets/images/authentication-onboarding/register.png') as number,
+  emailVerification: require('../../../assets/images/authentication-onboarding/email-verification.png') as number,
+  onboardingWelcome: require('../../../assets/images/authentication-onboarding/onboarding-welcome.png') as number,
+  activitySedentary: require('../../../assets/images/authentication-onboarding/activity-sedentary.png') as number,
+  activityLightlyActive: require('../../../assets/images/authentication-onboarding/activity-lightly-active.png') as number,
+  activityModeratelyActive: require('../../../assets/images/authentication-onboarding/activity-moderately-active.png') as number,
+  activityVeryActive: require('../../../assets/images/authentication-onboarding/activity-very-active.png') as number,
+  planSummary: require('../../../assets/images/authentication-onboarding/plan-summary.png') as number,
   dashboard: require('../../../assets/images/rocco/rocco-dashboard.png') as number,
   workout: require('../../../assets/images/rocco/rocco-workout-hero.png') as number,
   meals: require('../../../assets/images/rocco/rocco-meal-hero.png') as number,
@@ -12,6 +23,17 @@ export const roccoAssets = {
 export type RoccoVariant = keyof typeof roccoAssets;
 
 export const roccoDescriptions: Record<RoccoVariant, string> = {
+  welcome: 'Rocco welcoming you to FitPilot',
+  interactiveWelcome: 'Rocco waving hello',
+  login: 'Rocco cheering you on',
+  register: 'Rocco showing his strength',
+  emailVerification: 'Rocco holding a verification checklist',
+  onboardingWelcome: 'Rocco introducing your fitness plan',
+  activitySedentary: 'Rocco describing a mostly seated routine',
+  activityLightlyActive: 'Rocco stretching',
+  activityModeratelyActive: 'Rocco lifting a dumbbell',
+  activityVeryActive: 'Rocco running',
+  planSummary: 'Rocco celebrating your completed plan',
   dashboard: 'Rocco, the FitPilot wolf mascot',
   workout: 'Rocco ready to train',
   meals: 'Rocco supporting your nutrition journey',

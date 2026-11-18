@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
-import { AppState, Pressable, ScrollView, View } from 'react-native';
+import { AppState, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Animated, { cancelAnimation, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { AppScreen } from '@/components/layout/app-screen';
 import { Entrance } from '@/components/motion/entrance';
 import { AppButton } from '@/components/ui/app-button';
 import { AppText } from '@/components/ui/app-text';
 import { RoccoImage } from '@/components/mascot/rocco-image';
 import { useAuth } from '@/lib/auth/auth-provider';
-import { radius, spacing, useAppColors } from '@/theme';
+import { spacing } from '@/theme';
 
 const phrases = ["You've got this!", 'Ready when you are!', 'One step at a time.', "Let's get moving!"];
 
 export default function AuthWelcomeScreen() {
   const { notice, clearNotice } = useAuth();
-  const colors = useAppColors();
+  const { width: windowWidth } = useWindowDimensions();
+  const mascotWidth = Math.min(320, windowWidth - spacing.xl * 2);
   const [phraseIndex, setPhraseIndex] = useState(-1);
   const focused = useIsFocused();
   const reducedMotion = useReducedMotion();
   const idle = useSharedValue(0);
+  const greeting = useSharedValue(0);
 
   useEffect(() => {
     const startIdle = () => {
@@ -40,11 +42,15 @@ export default function AuthWelcomeScreen() {
   }, [focused, idle, reducedMotion]);
 
   const roccoMotion = useAnimatedStyle(() => ({
-    transform: [{ translateY: interpolate(idle.get(), [0, 1], [0, -4]) }],
+    transform: [
+      { translateY: interpolate(idle.get(), [0, 1], [0, -4]) + greeting.get() },
+      { scale: interpolate(greeting.get(), [-5, 0], [1.015, 1]) },
+    ],
   }));
 
   const greet = () => {
     setPhraseIndex((current) => (current + 1) % phrases.length);
+    if (!reducedMotion) greeting.set(withSequence(withTiming(-5, { duration: 100 }), withTiming(0, { duration: 160 })));
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
   };
 
@@ -56,10 +62,10 @@ export default function AuthWelcomeScreen() {
         </Entrance>
 
         <View style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: spacing.xl }}>
-          <Entrance delay={50} style={{ width: '100%', maxWidth: 360, alignItems: 'center' }}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Say hello to Rocco" accessibilityHint="Tap for a little encouragement." onPress={greet} style={({ pressed }) => ({ width: '100%', minHeight: 270, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceTint, borderRadius: radius.xl, borderCurve: 'continuous', transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }] })}>
+          <Entrance delay={50} style={{ width: '100%', maxWidth: 420, alignItems: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Say hello to Rocco" accessibilityHint="Tap for a little encouragement." onPress={greet} style={({ pressed }) => ({ width: '100%', minHeight: 280, alignItems: 'center', justifyContent: 'center', transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }] })}>
               <Animated.View style={roccoMotion}>
-                <RoccoImage variant="coach" width={250} height={250} decorative />
+                <RoccoImage variant="welcome" width={mascotWidth} height={mascotWidth * 0.75} decorative />
               </Animated.View>
             </Pressable>
           </Entrance>

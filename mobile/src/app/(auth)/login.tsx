@@ -63,10 +63,10 @@ export default function LoginScreen() {
     <AppScreen safeTop safeBottom>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
-          <View style={{ alignItems: 'center', gap: spacing.sm }}>
-            <Entrance><RoccoImage variant="coachAvatar" width={104} height={104} decorative /></Entrance>
-            <Entrance delay={55}><AppText variant="display" align="center">Welcome back.</AppText></Entrance>
-            <Entrance delay={100}><AppText variant="secondary" tone="secondary" align="center">Every step counts. Pick up where you left off.</AppText></Entrance>
+          <View style={{ alignItems: 'flex-start', gap: spacing.xs }}>
+            <Entrance><RoccoImage variant="login" width={176} height={176} decorative /></Entrance>
+            <Entrance delay={55}><AppText variant="display">Welcome back.</AppText></Entrance>
+            <Entrance delay={100}><AppText variant="secondary" tone="secondary">Every step counts. Pick up where you left off.</AppText></Entrance>
           </View>
 
           <View style={{ gap: spacing.lg }}>

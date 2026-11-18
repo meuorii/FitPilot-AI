@@ -48,7 +48,7 @@ export default function PlanSummaryScreen() {
       <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, padding: spacing.xl, paddingBottom: spacing.xxl, gap: spacing.xl }}>
         <Entrance><OnboardingProgress step={4} /></Entrance>
         <Entrance delay={55} style={{ alignItems: 'center', gap: spacing.sm }}>
-          <RoccoImage variant="progress" width={132} height={150} decorative />
+          <RoccoImage variant="planSummary" width={144} height={180} decorative />
           <AppText variant="display" align="center">Your plan is ready.</AppText>
           <AppText variant="secondary" tone="secondary" align="center">Your starting goals are set. Let’s make every session count.</AppText>
         </Entrance>

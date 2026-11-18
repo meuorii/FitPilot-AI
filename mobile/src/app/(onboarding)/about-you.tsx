@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,12 +15,13 @@ import type { ActivityLevel, CalculateGoalsRequest } from '@/lib/auth/auth-types
 import { validateAboutYou, onboardingBaselineKey } from '@/lib/auth/auth-validation';
 import { useOnboardingDraft } from '@/lib/onboarding/onboarding-draft';
 import { useAppColors, radius, spacing } from '@/theme';
+import { RoccoImage } from '@/components/mascot/rocco-image';
 
-const activityOptions: { value: ActivityLevel; label: string; description: string; frequency: string; image: number }[] = [
-  { value: 'sedentary', label: 'Sedentary', description: 'Mostly seated, with little planned exercise.', frequency: '0–1 sessions a week', image: require('../../../assets/images/onboarding/activity-sedentary.png') },
-  { value: 'lightly_active', label: 'Lightly active', description: 'Regular movement and a few easy sessions.', frequency: '1–3 sessions a week', image: require('../../../assets/images/onboarding/activity-lightly-active.png') },
-  { value: 'moderately_active', label: 'Moderately active', description: 'Consistent exercise across most weeks.', frequency: '3–5 sessions a week', image: require('../../../assets/images/onboarding/activity-moderately-active.png') },
-  { value: 'very_active', label: 'Very active', description: 'Frequent training or a physical daily routine.', frequency: '6–7 sessions a week', image: require('../../../assets/images/onboarding/activity-very-active.png') },
+const activityOptions: { value: ActivityLevel; label: string; description: string; frequency: string; image: 'activitySedentary' | 'activityLightlyActive' | 'activityModeratelyActive' | 'activityVeryActive' }[] = [
+  { value: 'sedentary', label: 'Sedentary', description: 'Mostly seated, with little planned exercise.', frequency: '0–1 sessions a week', image: 'activitySedentary' },
+  { value: 'lightly_active', label: 'Lightly active', description: 'Regular movement and a few easy sessions.', frequency: '1–3 sessions a week', image: 'activityLightlyActive' },
+  { value: 'moderately_active', label: 'Moderately active', description: 'Consistent exercise across most weeks.', frequency: '3–5 sessions a week', image: 'activityModeratelyActive' },
+  { value: 'very_active', label: 'Very active', description: 'Frequent training or a physical daily routine.', frequency: '6–7 sessions a week', image: 'activityVeryActive' },
 ];
 
 export default function AboutYouScreen() {
@@ -100,16 +101,18 @@ export default function AboutYouScreen() {
 
           <Entrance delay={105} style={{ gap: spacing.md }}>
             <View style={{ gap: spacing.xs }}><AppText variant="cardTitle">How active are you?</AppText><AppText variant="caption" tone="secondary">Choose what describes a typical week, not your best week.</AppText></View>
+            <View accessibilityRole="radiogroup" accessibilityLabel="Weekly activity level" style={{ gap: spacing.sm }}>
             {activityOptions.map((option) => {
               const selected = aboutYou.activity_level === option.value;
               return (
-                <Pressable key={option.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => { updateAboutYou('activity_level', option.value); setErrors((old) => ({ ...old, activity_level: '' })); }} style={({ pressed }) => ({ minHeight: 104, flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md, borderRadius: radius.md, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.82 : 1 })}>
-                  <Image source={option.image} contentFit="contain" transition={0} style={{ width: 76, height: 72 }} accessibilityLabel={`${option.label} activity illustration`} />
+                <Pressable key={option.value} accessibilityRole="radio" accessibilityLabel={`${option.label}. ${option.description} ${option.frequency}`} accessibilityState={{ selected }} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); updateAboutYou('activity_level', option.value); setErrors((old) => ({ ...old, activity_level: '' })); }} style={({ pressed }) => ({ minHeight: 104, flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md, borderRadius: radius.md, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.82 : 1 })}>
+                  <RoccoImage variant={option.image} width={62} height={78} decorative />
                   <View style={{ flex: 1, gap: spacing.xxs }}><AppText variant="cardTitle">{option.label}</AppText><AppText variant="caption" tone="secondary">{option.description}</AppText><AppText variant="caption" tone="accent">{option.frequency}</AppText></View>
                   <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: 22, height: 22, borderWidth: 2, borderColor: selected ? colors.accentStrong : colors.border, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' }}>{selected ? <View style={{ width: 10, height: 10, borderRadius: radius.pill, backgroundColor: colors.accentStrong }} /> : null}</View>
                 </Pressable>
               );
             })}
+            </View>
             {errors.activity_level ? <AppText variant="caption" tone="error">{errors.activity_level}</AppText> : null}
           </Entrance>
 

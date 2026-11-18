@@ -1,6 +1,6 @@
 # FitPilot AI Mobile Roadmap
 
-Status reflects repository evidence as of 2026-11-15. Phase 1 is documented, Phase 2's native foundation is implemented, Phase 3 authentication/onboarding and the pre-Phase 4 white-theme/auth/welcome refinement are implemented, and physical-device plus safe-backend validation remain pending.
+Status reflects repository evidence as of 2026-11-18. Phase 1 is documented, Phase 2's native foundation is implemented, Phase 3 authentication/onboarding and premium pre-Phase 4 visual refinements are implemented, and physical-device plus safe-backend validation remain pending.
 
 | Phase | Status | Objective and deliverables | Depends on / gate |
 |---|---|---|---|
@@ -17,6 +17,10 @@ Status reflects repository evidence as of 2026-11-15. Phase 1 is documented, Pha
 ## Pre-Phase 4 refinement checkpoint
 
 The mobile app now uses a fixed white-first theme and an interactive Rocco welcome for signed-out users. Login, registration, email verification, and the existing onboarding screens received focused layout and motion refinements. Auth/session semantics, server calculations, app boundaries, and the nine-phase numbering are preserved. TypeScript, lint, the existing auth regression tests, SDK dependency validation, Expo Doctor (20/20), and iOS/Android exports pass. Physical-device visual/accessibility checks and safe staging auth flows remain pending. See [PRE_PHASE_04_UI_REFINEMENT.md](docs/mobile/PRE_PHASE_04_UI_REFINEMENT.md). Phase 4 remains not started.
+
+## Phase 3 premium UI refinement checkpoint (2026-11-18)
+
+The eleven supplied auth/onboarding Rocco assets are registered and used in the appropriate Phase 3 contexts. Login and Registration use contained waist-up portraits; verification uses its clipboard artwork without a redundant mail badge; About You points to the new activity assets; and onboarding welcome and plan summary use their dedicated images. Screen layouts prioritize each task, and the welcome pose pair was not crossfaded because its character scale/arm placement differs. Auth contracts, secure session behavior, server calculations, and route guards remain unchanged. Typecheck, lint, and 5/5 auth tests pass. Current SDK package metadata flags Expo and Expo Router patch drift; this task did not upgrade them. Expo Doctor passed 19/20 with only that drift. Export and device results are recorded in [PHASE_03_PREMIUM_UI_REFINEMENT.md](docs/mobile/PHASE_03_PREMIUM_UI_REFINEMENT.md). Phase 3 is **READY WITH CONDITIONS**; Phase 4 remains not started.
 
 ## Recommended skill routing
 

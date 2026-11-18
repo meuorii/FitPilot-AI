@@ -67,10 +67,10 @@ export default function RegisterScreen() {
     <AppScreen safeTop safeBottom>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, gap: spacing.xxl }}>
-          <View style={{ alignItems: 'center', gap: spacing.sm }}>
-            <Entrance><RoccoImage variant="workout" width={82} height={92} decorative /></Entrance>
-            <Entrance delay={55}><AppText variant="display" align="center">Start with your name.</AppText></Entrance>
-            <Entrance delay={100}><AppText variant="secondary" tone="secondary" align="center">Create an account and we’ll build a plan around you.</AppText></Entrance>
+          <View style={{ alignItems: 'flex-start', gap: spacing.xs }}>
+            <Entrance><RoccoImage variant="register" width={150} height={150} decorative /></Entrance>
+            <Entrance delay={55}><AppText variant="display">Start with your name.</AppText></Entrance>
+            <Entrance delay={100}><AppText variant="secondary" tone="secondary">Create an account and we’ll build a plan around you.</AppText></Entrance>
           </View>
           <View style={{ gap: spacing.lg }}>
             {requestError ? <AppText accessibilityRole="alert" variant="secondary" tone="error">{requestError}</AppText> : null}
