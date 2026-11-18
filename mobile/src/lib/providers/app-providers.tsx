@@ -18,7 +18,7 @@ export function AppProviders({ children }: PropsWithChildren) {
       ...base,
       colors: {
         ...base.colors,
-        primary: colors.accent,
+        primary: colors.accentStrong,
         background: colors.background,
         card: colors.surface,
         text: colors.text,

@@ -15,10 +15,11 @@ export const AppTextField = forwardRef<TextInputInstance, AppTextFieldProps>(fun
   const colors = useAppColors();
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
+  const disabled = props.editable === false;
   return (
     <View style={{ gap: spacing.xs }}>
       <AppText variant="secondary" style={{ fontWeight: '600' }}>{label}</AppText>
-      <View style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: focused && !error ? 1.5 : 1, borderColor: error ? colors.error : focused ? colors.focus : colors.border, borderRadius: radius.md, borderCurve: 'continuous', backgroundColor: colors.surface }}>
+      <View style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: focused && !error ? 1.5 : 1, borderColor: error ? colors.error : focused ? colors.focus : colors.controlBorder, borderRadius: radius.md, borderCurve: 'continuous', backgroundColor: disabled ? colors.disabled : colors.surface }}>
         <TextInput
           ref={ref}
           {...props}
@@ -29,7 +30,7 @@ export const AppTextField = forwardRef<TextInputInstance, AppTextFieldProps>(fun
           secureTextEntry={secure && !visible}
           placeholderTextColor={colors.textMuted}
           selectionColor={colors.accentStrong}
-          style={[{ flex: 1, minHeight: 50, paddingHorizontal: spacing.md, color: colors.text, fontSize: 16 }, style]}
+          style={[{ flex: 1, minHeight: 50, paddingHorizontal: spacing.md, color: disabled ? colors.disabledText : colors.text, fontSize: 16 }, style]}
         />
         {secure ? <Pressable accessibilityRole="button" accessibilityLabel={visible ? 'Hide password' : 'Show password'} accessibilityState={{ selected: visible }} hitSlop={8} onPress={() => setVisible((current) => !current)} style={({ pressed }) => ({ width: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}><Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textSecondary} /></Pressable> : null}
       </View>

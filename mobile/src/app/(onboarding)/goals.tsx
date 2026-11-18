@@ -92,7 +92,7 @@ export default function OnboardingGoalsScreen() {
           {goalOptions.map((goal) => {
             const selected = goal.goal === selectedGoal?.goal;
             return (
-              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); selectGoal(goal); }} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.border, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
+              <Pressable key={goal.goal} accessibilityRole="radio" accessibilityLabel={`${goal.label}${goal.is_recommended ? ', recommended' : ''}`} accessibilityState={{ selected }} disabled={mutation.isPending} onPress={() => { void Haptics.selectionAsync().catch(() => undefined); selectGoal(goal); }} style={({ pressed }) => ({ padding: spacing.lg, gap: spacing.md, borderRadius: radius.lg, borderCurve: 'continuous', borderWidth: 1, borderColor: selected ? colors.accentStrong : colors.controlBorder, backgroundColor: selected ? colors.surfaceTint : colors.surface, opacity: pressed ? 0.85 : 1 })}>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm }}>
                   <View style={{ flex: 1, gap: spacing.xs }}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs }}>
@@ -102,7 +102,7 @@ export default function OnboardingGoalsScreen() {
                     <AppText variant="caption" tone="secondary">{goalDescriptions[goal.goal]}</AppText>
                     {goal.is_recommended && goal.recommendation_reason ? <AppText variant="caption" tone="secondary">{goal.recommendation_reason}</AppText> : null}
                   </View>
-                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: 24, height: 24, borderWidth: 2, borderColor: selected ? colors.accentStrong : colors.border, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' }}>{selected ? <View style={{ width: 12, height: 12, borderRadius: radius.pill, backgroundColor: colors.accentStrong }} /> : null}</View>
+                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: 24, height: 24, borderWidth: 2, borderColor: selected ? colors.accentStrong : colors.controlBorder, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' }}>{selected ? <View style={{ width: 12, height: 12, borderRadius: radius.pill, backgroundColor: colors.accentStrong }} /> : null}</View>
                 </View>
                 <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: spacing.md, gap: spacing.sm }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.xs }}>

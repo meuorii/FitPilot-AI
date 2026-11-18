@@ -23,7 +23,7 @@ export default function TabLayout() {
         headerShadowVisible: false,
         headerTintColor: colors.text,
         headerRight: () => <AppIconButton icon="person-circle-outline" label="Open settings" onPress={() => router.push('/(app)/settings')} style={{ marginRight: 6 }} />,
-        tabBarActiveTintColor: colors.accentStrong,
+        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, paddingTop: 6 },
         tabBarLabelStyle: { ...typography.caption, fontSize: 11, marginBottom: 2 },

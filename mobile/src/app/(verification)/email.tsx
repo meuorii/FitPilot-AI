@@ -111,7 +111,7 @@ export default function EmailVerificationScreen() {
         <Animated.View style={[{ position: 'relative' }, codeMotion]}>
           <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing.xs }}>
             {Array.from({ length: 6 }, (_, index) => (
-              <View key={index} style={{ flex: 1, maxWidth: 48, height: 58, borderRadius: radius.md, borderCurve: 'continuous', borderWidth: 1, borderColor: error ? colors.error : index === code.length ? colors.accentStrong : colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+              <View key={index} style={{ flex: 1, maxWidth: 48, height: 58, borderRadius: radius.md, borderCurve: 'continuous', borderWidth: 1, borderColor: error ? colors.error : index === code.length ? colors.accentStrong : colors.controlBorder, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
                 <Animated.View key={`${index}-${code[index] ?? 'empty'}`} entering={code[index] && !reducedMotion ? FadeIn.duration(120) : undefined}><AppText variant="sectionTitle" style={{ fontVariant: ['tabular-nums'] }}>{code[index] ?? ''}</AppText></Animated.View>
               </View>
             ))}

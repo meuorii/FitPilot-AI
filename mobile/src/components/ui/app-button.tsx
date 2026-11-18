@@ -15,8 +15,8 @@ export function AppButton({ label, variant = 'primary', loading = false, disable
   const colors = useAppColors();
   const unavailable = Boolean(disabled || loading);
   const isPrimary = variant === 'primary';
-  const background = isPrimary ? colors.accentStrong : variant === 'secondary' ? colors.surface : 'transparent';
-  const foreground = isPrimary ? colors.onAccent : colors.text;
+  const background = isPrimary ? colors.accent : variant === 'secondary' ? colors.surfaceTint : 'transparent';
+  const foreground = isPrimary ? colors.onAccent : variant === 'quiet' ? colors.accentStrong : colors.text;
   const onPressIn = (event: Parameters<NonNullable<PressableProps['onPressIn']>>[0]) => {
     if (!unavailable && (haptic ?? isPrimary)) void Haptics.selectionAsync().catch(() => undefined);
     props.onPressIn?.(event);
@@ -34,12 +34,12 @@ export function AppButton({ label, variant = 'primary', loading = false, disable
       accessibilityRole="button"
       accessibilityState={{ disabled: unavailable, busy: loading }}
       style={({ pressed }) => [
-        { minHeight: 48, paddingHorizontal: spacing.xl, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: spacing.xs, backgroundColor: unavailable ? colors.disabled : pressed && isPrimary ? colors.accentPressed : background, borderWidth: variant === 'secondary' ? 1 : 0, borderColor: colors.border, opacity: pressed && !isPrimary && !unavailable ? 0.72 : 1 },
+        { minHeight: 48, paddingHorizontal: spacing.xl, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: spacing.xs, backgroundColor: unavailable ? colors.disabled : pressed && isPrimary ? colors.accentPressed : pressed && variant === 'secondary' ? colors.borderStrong : pressed && variant === 'quiet' ? colors.surfacePressed : background, borderWidth: variant === 'secondary' ? 1 : 0, borderColor: colors.controlBorder, opacity: pressed && variant === 'quiet' && !unavailable ? 0.72 : 1 },
         style,
       ]}
     >
-      {loading ? <ActivityIndicator color={foreground} size="small" /> : null}
-      <AppText variant="button" style={{ color: foreground }}>{label}</AppText>
+      {loading ? <ActivityIndicator color={unavailable ? colors.disabledText : foreground} size="small" /> : null}
+      <AppText variant="button" style={{ color: unavailable ? colors.disabledText : foreground }}>{label}</AppText>
     </Pressable>
   );
 }

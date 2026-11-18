@@ -9,7 +9,7 @@ type AppIconButtonProps = Omit<PressableProps, 'children' | 'style'> & { icon: I
 export function AppIconButton({ icon, label, size = 21, style, ...props }: AppIconButtonProps) {
   const colors = useAppColors();
   return (
-    <Pressable {...props} accessibilityRole="button" accessibilityLabel={label} hitSlop={8} style={({ pressed }) => [{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.surfaceTint : 'transparent' }, style]}>
+    <Pressable {...props} accessibilityRole="button" accessibilityLabel={label} hitSlop={8} style={({ pressed }) => [{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.surfacePressed : 'transparent' }, style]}>
       <Ionicons name={icon} size={size} color={colors.text} />
     </Pressable>
   );
