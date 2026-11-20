@@ -44,7 +44,7 @@ export function WeeklyActivityCard({ week }: WeeklyActivityCardProps) {
   );
 
   return (
-    <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+    <section className="dashboard-weekly-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-extrabold text-[#38323F]">Weekly Activity</h2>
@@ -57,7 +57,7 @@ export function WeeklyActivityCard({ week }: WeeklyActivityCardProps) {
         </p>
       </div>
 
-      <div className="mt-6 grid h-44 grid-cols-7 items-end gap-2" aria-label="Weekly sets completed chart">
+      <div className="dashboard-weekly-chart mt-6 grid min-h-44 grid-cols-7 items-end gap-2" aria-label="Weekly sets completed chart">
         {activity.map((item) => {
           const height = item.sets_completed === 0 ? 4 : Math.max(12, (item.sets_completed / maxSets) * 100);
           return (

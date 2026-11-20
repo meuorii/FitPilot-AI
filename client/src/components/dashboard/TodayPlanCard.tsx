@@ -37,7 +37,7 @@ export function TodayPlanCard({ today }: TodayPlanCardProps) {
   ];
 
   return (
-    <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+    <section className="dashboard-plan-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
       <h2 className="text-lg font-extrabold text-[#38323F]">Today&apos;s Plan</h2>
       <p className="mt-1 text-xs text-[#8A858F]">Quick actions based on your current dashboard data.</p>
 

@@ -349,7 +349,7 @@ export function QuickSessionPreview({
             />
 
             <div className="min-w-0">
-              <p className="line-clamp-2 text-base font-extrabold text-[#38323F]">
+              <p className="text-base font-extrabold text-[#38323F]">
                 {currentExercise?.name ??
                   'Exercise unavailable'}
               </p>
@@ -365,11 +365,11 @@ export function QuickSessionPreview({
               </p>
 
               {instructions[0] ? (
-                <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#8B8690]">
+                <p className="mt-2 text-[11px] leading-5 text-[#8B8690]">
                   {instructions[0]}
                 </p>
               ) : current.notes ? (
-                <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#8B8690]">
+                <p className="mt-2 text-[11px] leading-5 text-[#8B8690]">
                   {current.notes}
                 </p>
               ) : null}

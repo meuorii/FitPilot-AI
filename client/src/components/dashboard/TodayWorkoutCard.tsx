@@ -9,7 +9,7 @@ interface TodayWorkoutCardProps {
 export function TodayWorkoutCard({ workout }: TodayWorkoutCardProps) {
   if (!workout) {
     return (
-      <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+      <section className="dashboard-workout-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-extrabold text-[#38323F]">Today&apos;s Workout</h2>
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#7482A4]/10 text-[#7482A4]">
@@ -41,7 +41,7 @@ export function TodayWorkoutCard({ workout }: TodayWorkoutCardProps) {
   const ctaLabel = completed ? "View Workout" : "Continue Workout";
 
   return (
-    <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+    <section className="dashboard-workout-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8A858F]">Today&apos;s Workout</p>
@@ -61,7 +61,7 @@ export function TodayWorkoutCard({ workout }: TodayWorkoutCardProps) {
 
       <Link
         to="/workouts"
-        className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#657394] hover:text-[#4F5A73] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4] focus-visible:ring-offset-2"
+        className="dashboard-workout-card__action mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#657394] hover:text-[#4F5A73] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4] focus-visible:ring-offset-2"
       >
         {ctaLabel}
         <ArrowRight className="h-4 w-4" />

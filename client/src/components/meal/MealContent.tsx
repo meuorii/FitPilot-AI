@@ -41,7 +41,7 @@ export function MealContent({
   const dateLabel = isToday ? 'Today' : formatMealDateKey(date)
 
   return (
-    <div className="mt-5 min-w-0 space-y-4 2xl:space-y-5">
+    <div className="dashboard-page-section mt-5 min-w-0 space-y-4 2xl:space-y-5">
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.85fr)_minmax(300px,0.9fr)] 2xl:gap-5">
         <div className="min-w-0 space-y-4 2xl:space-y-5">
           <MealHero onParseAI={onFocusParser} />

@@ -12,22 +12,14 @@ export function DashboardSkeleton() {
         </div>
         <Block className="h-11 w-44 sm:w-80" />
       </div>
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="space-y-5">
-          <Block className="h-72 w-full" />
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => <Block key={i} className="h-36 w-full" />)}
-          </div>
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Block className="h-80 w-full" />
-            <Block className="h-80 w-full" />
-          </div>
-        </div>
-        <div className="space-y-5">
-          <Block className="h-80 w-full" />
-          <Block className="h-72 w-full" />
-          <Block className="h-80 w-full" />
-        </div>
+      <div className="dashboard-dashboard__skeleton">
+        <Block className="dashboard-dashboard__skeleton-hero min-h-72 w-full" />
+        <Block className="dashboard-dashboard__skeleton-nutrition min-h-72 w-full" />
+        <Block className="dashboard-dashboard__skeleton-calendar min-h-80 w-full" />
+        <Block className="dashboard-dashboard__skeleton-activity min-h-80 w-full" />
+        <Block className="dashboard-dashboard__skeleton-plan min-h-72 w-full" />
+        <Block className="dashboard-dashboard__skeleton-workout min-h-72 w-full" />
+        <Block className="dashboard-dashboard__skeleton-summary min-h-80 w-full" />
       </div>
     </div>
   );

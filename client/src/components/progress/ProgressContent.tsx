@@ -48,8 +48,8 @@ export function ProgressContent({
   onLogCheckIn,
 }: ProgressContentProps) {
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
+    <div className="dashboard-bento dashboard-bento--progress space-y-5">
+      <div className="dashboard-bento__overview grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
         {overview ? (
           <ProgressHero
             goal={overview.goal}
@@ -73,29 +73,37 @@ export function ProgressContent({
         />
       </div>
 
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
+      <div className="dashboard-bento__workspace grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
         <div className="min-w-0 space-y-5">
           {overview ? (
             <>
-              <div className="grid min-w-0 gap-5 xl:grid-cols-2">
-                <GoalProgressCard
+              <div className="progress-analytics-grid">
+                <div className="progress-analytics-grid__goal">
+                  <GoalProgressCard
                   goal={overview.goal}
                   onLogCheckIn={onLogCheckIn}
-                />
-                <WeightTrendCard
+                  />
+                </div>
+                <div className="progress-analytics-grid__weight">
+                  <WeightTrendCard
                   points={overview.weight_trend}
                   trendDays={overview.meta.trend_days}
                   onLogCheckIn={onLogCheckIn}
-                />
-                <BodyFatTrendCard
+                  />
+                </div>
+                <div className="progress-analytics-grid__body-fat">
+                  <BodyFatTrendCard
                   points={overview.body_fat_trend}
                   trendDays={overview.meta.trend_days}
                   onLogCheckIn={onLogCheckIn}
-                />
-                <LatestCheckInCard
+                  />
+                </div>
+                <div className="progress-analytics-grid__latest">
+                  <LatestCheckInCard
                   checkIn={overview.latest_check_in}
                   onLogCheckIn={onLogCheckIn}
-                />
+                  />
+                </div>
               </div>
             </>
           ) : null}

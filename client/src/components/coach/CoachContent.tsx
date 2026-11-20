@@ -57,8 +57,8 @@ export function CoachContent({
   onRetryChat,
 }: CoachContentProps) {
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <div className="dashboard-bento dashboard-bento--coach space-y-5">
+      <div className="dashboard-bento__overview grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
         {isContextLoading && !context ? (
           <CoachHeroSkeleton />
         ) : (
@@ -84,7 +84,7 @@ export function CoachContent({
         )}
       </div>
 
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+      <div className="dashboard-bento__workspace grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
         <CoachChat
           messages={messages}
           composerValue={composerValue}

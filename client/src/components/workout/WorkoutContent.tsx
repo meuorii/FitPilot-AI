@@ -76,7 +76,7 @@ export function WorkoutContent({
     ])
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.72fr)_minmax(330px,1fr)]">
+    <div className="dashboard-bento dashboard-bento--workouts">
       <WorkoutHero
         routine={displayRoutine}
         activeSession={

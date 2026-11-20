@@ -6,7 +6,7 @@ interface MealHeroProps { onParseAI: () => void }
 
 export function MealHero({ onParseAI }: MealHeroProps) {
   return (
-    <section className="relative isolate min-h-[245px] overflow-hidden rounded-[24px] bg-gradient-to-br from-[#7482A4] via-[#667493] to-[#55617C] p-5 text-white shadow-sm sm:min-h-[270px] sm:p-7">
+    <section className="dashboard-hero relative isolate min-h-[245px] overflow-hidden rounded-[24px] bg-[#667493] p-5 text-white shadow-sm sm:min-h-[270px] sm:p-7">
       <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-14 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute right-[22%] top-0 h-full w-px rotate-[35deg] bg-white/10" />
       <div className="relative z-10 max-w-[68%] sm:max-w-[65%]">

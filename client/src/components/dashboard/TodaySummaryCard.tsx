@@ -21,7 +21,7 @@ export function TodaySummaryCard({ summary }: TodaySummaryCardProps) {
   ];
 
   return (
-    <section className="rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+    <section className="dashboard-summary-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
       <h2 className="text-lg font-extrabold text-[#38323F]">Today&apos;s Summary</h2>
       <div className="mt-4 grid grid-cols-2 gap-3">
         {primary.map(([label, value]) => (
