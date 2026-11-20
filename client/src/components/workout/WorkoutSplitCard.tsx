@@ -66,7 +66,7 @@ export function WorkoutSplitCard({
               <p className="truncate text-sm font-extrabold text-[#38323F]">
                 {split.name}
               </p>
-              <p className="mt-0.5 line-clamp-1 text-xs text-[#8B8690]">
+              <p className="mt-0.5 text-xs text-[#8B8690]">
                 {split.description ||
                   'Your active weekly workout split.'}
               </p>

@@ -72,8 +72,8 @@ export function SettingsContent({
   onNavigate,
 }: SettingsContentProps) {
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
+    <div className="dashboard-bento dashboard-bento--settings space-y-5">
+      <div className="dashboard-bento__overview grid gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
         <SettingsHero
           settings={settings}
           onReviewPreferences={() =>
@@ -89,7 +89,7 @@ export function SettingsContent({
         />
       </div>
 
-      <div className="grid min-w-0 gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
+      <div className="dashboard-bento__workspace grid min-w-0 gap-5 2xl:grid-cols-[minmax(0,2.15fr)_minmax(300px,0.85fr)]">
         <div className="grid min-w-0 gap-5 xl:grid-cols-2">
           <AccountInformationCard
             account={settings.account}

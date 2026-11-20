@@ -223,13 +223,13 @@ export function TodayExerciseList({
                     </p>
 
                     {instructions[0] ? (
-                      <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#8B8690]">
+                      <p className="mt-2 text-[11px] leading-5 text-[#8B8690]">
                         {
                           instructions[0]
                         }
                       </p>
                     ) : item.notes ? (
-                      <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#8B8690]">
+                      <p className="mt-2 text-[11px] leading-5 text-[#8B8690]">
                         {item.notes}
                       </p>
                     ) : (

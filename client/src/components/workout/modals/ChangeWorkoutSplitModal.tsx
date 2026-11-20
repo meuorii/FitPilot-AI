@@ -64,7 +64,7 @@ export function ChangeWorkoutSplitModal({
               <button key={split.id} type="button" onClick={() => setSelectedId(split.id)} className={`flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7482A4] ${selected ? 'border-[#7482A4] bg-[#F2F3F7]' : 'border-[#EAE7EC] hover:bg-[#FAF9FB]'}`}>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-extrabold text-[#38323F]">{split.name}</p>
-                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#8B8690]">{split.description || 'No description provided.'}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#8B8690]">{split.description || 'No description provided.'}</p>
                 </div>
                 <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border ${selected ? 'border-[#7482A4] bg-[#7482A4] text-white' : 'border-[#D8D4DC] text-transparent'}`}>
                   <Check className="h-4 w-4" />

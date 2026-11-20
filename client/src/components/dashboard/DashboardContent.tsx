@@ -13,23 +13,33 @@ interface DashboardContentProps {
 
 export function DashboardContent({ data }: DashboardContentProps) {
   return (
-    <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="min-w-0 space-y-5">
+    <div className="dashboard-dashboard">
+      <div className="dashboard-dashboard__overview">
         <DashboardHero nutrition={data.today.nutrition} />
         <NutritionOverview nutrition={data.today.nutrition} />
-        <div className="grid gap-5 xl:grid-cols-2">
-          <TodayWorkoutCard workout={data.today.workout} />
-          <WeeklyActivityCard week={data.week} />
-        </div>
       </div>
 
-      <aside className="grid min-w-0 gap-5 md:grid-cols-2 2xl:grid-cols-1 2xl:self-start">
-        <DashboardCalendar calendar={data.calendar} today={data.today.date} />
-        <TodayPlanCard today={data.today} />
-        <div className="md:col-span-2 2xl:col-span-1">
+      <div className="dashboard-dashboard__grid">
+        <div className="dashboard-dashboard__calendar">
+          <DashboardCalendar calendar={data.calendar} today={data.today.date} />
+        </div>
+
+        <div className="dashboard-dashboard__activity">
+          <WeeklyActivityCard week={data.week} />
+        </div>
+
+        <div className="dashboard-dashboard__plan">
+          <TodayPlanCard today={data.today} />
+        </div>
+
+        <div className="dashboard-dashboard__workout">
+          <TodayWorkoutCard workout={data.today.workout} />
+        </div>
+
+        <div className="dashboard-dashboard__summary">
           <TodaySummaryCard summary={data.today_summary} />
         </div>
-      </aside>
+      </div>
     </div>
   );
 }

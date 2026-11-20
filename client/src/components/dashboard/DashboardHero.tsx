@@ -14,7 +14,7 @@ function remainingLabel(remaining: number, exceeded: number, unit: string) {
 
 export function DashboardHero({ nutrition }: DashboardHeroProps) {
   return (
-    <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#7482A4] via-[#667493] to-[#55617C] p-6 text-white shadow-sm sm:p-8">
+    <section className="dashboard-hero relative overflow-hidden rounded-[24px] bg-[#667493] p-6 text-white shadow-sm sm:p-8">
       <div className="relative z-10 max-w-[62%] sm:max-w-[66%]">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-xs font-bold backdrop-blur-sm">
           <Flame className="h-4 w-4" />

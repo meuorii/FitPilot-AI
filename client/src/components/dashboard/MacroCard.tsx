@@ -13,32 +13,44 @@ function formatMetricValue(value: number, unit: "kcal" | "g") {
 export function MacroCard({ label, metric, unit }: MacroCardProps) {
   const fill = Math.min(100, Math.max(0, metric.percentage));
   const exceeded = metric.exceeded > 0;
+  const percentageLabel = `${Math.round(metric.percentage)}%`;
+  const radius = 32;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (fill / 100) * circumference;
 
   return (
-    <article className="rounded-[22px] border border-[#EAE7EC] bg-white p-4 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold text-[#38323F]">{label}</p>
-          <p className="mt-1 text-xs text-[#8B8690]">
-            {formatMetricValue(metric.consumed, unit)} / {formatMetricValue(metric.target, unit)}
-          </p>
-        </div>
-        <span className="rounded-full bg-[#F5F3F6] px-2.5 py-1 text-xs font-bold text-[#6B6570]">
-          {Math.round(metric.percentage)}%
-        </span>
-      </div>
-
-      <div
-        className="mt-5 h-2.5 overflow-hidden rounded-full bg-[#EEECEF]"
-        aria-label={`${label} progress ${Math.round(metric.percentage)} percent`}
-      >
+    <article className="dashboard-macro-card">
+      <div className="dashboard-macro-card__topline">
+        <p className="text-sm font-bold text-[#38323F]">{label}</p>
         <div
-          className="h-full rounded-full bg-[#7482A4] transition-[width] duration-500"
-          style={{ width: `${fill}%` }}
-        />
+          className="dashboard-macro-ring"
+          role="progressbar"
+          aria-label={`${label} progress`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={fill}
+          aria-valuetext={`${percentageLabel}, ${formatMetricValue(metric.consumed, unit)} of ${formatMetricValue(metric.target, unit)}`}
+        >
+          <svg viewBox="0 0 80 80" aria-hidden="true">
+            <circle className="dashboard-macro-ring__track" cx="40" cy="40" r={radius} />
+            <circle
+              className="dashboard-macro-ring__value"
+              cx="40"
+              cy="40"
+              r={radius}
+              strokeDasharray={circumference}
+              strokeDashoffset={dashOffset}
+            />
+          </svg>
+          <span>{percentageLabel}</span>
+        </div>
       </div>
 
-      <p className={`mt-3 text-xs font-semibold ${exceeded ? "text-[#9A5E62]" : "text-[#77727B]"}`}>
+      <p className="dashboard-macro-card__amount">
+        {formatMetricValue(metric.consumed, unit)} / {formatMetricValue(metric.target, unit)}
+      </p>
+
+      <p className={`dashboard-macro-card__remaining ${exceeded ? "is-exceeded" : ""}`}>
         {exceeded
           ? `${formatMetricValue(metric.exceeded, unit)} over target`
           : `${formatMetricValue(Math.max(0, metric.remaining), unit)} remaining`}

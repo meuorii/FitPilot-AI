@@ -7,8 +7,8 @@ interface NutritionOverviewProps {
 
 export function NutritionOverview({ nutrition }: NutritionOverviewProps) {
   return (
-    <section>
-      <div className="mb-3 flex items-end justify-between gap-4">
+    <section className="dashboard-nutrition-card rounded-[24px] border border-[#EAE7EC] bg-white p-5 shadow-[0_8px_30px_rgba(56,50,63,0.04)]">
+      <div className="dashboard-nutrition-card__header">
         <div>
           <h2 className="text-lg font-extrabold text-[#38323F]">Calories &amp; Macros</h2>
           <p className="mt-1 text-xs text-[#8A858F]">Daily nutrition progress from your logged meals.</p>
@@ -18,7 +18,7 @@ export function NutritionOverview({ nutrition }: NutritionOverviewProps) {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="dashboard-nutrition-card__grid">
         <MacroCard label="Calories" metric={nutrition.calories} unit="kcal" />
         <MacroCard label="Protein" metric={nutrition.protein} unit="g" />
         <MacroCard label="Carbs" metric={nutrition.carbs} unit="g" />

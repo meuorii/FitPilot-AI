@@ -49,8 +49,8 @@ export function ProgressHero({
   onLogCheckIn,
 }: ProgressHeroProps) {
   return (
-    <section className="relative isolate min-h-[350px] overflow-hidden rounded-[24px] bg-gradient-to-br from-[#667493] via-[#7482A4] to-[#8F9AB7] p-6 text-white shadow-[0_16px_36px_rgba(56,50,63,0.12)] sm:p-7 lg:min-h-[390px] lg:p-8">
-      <div className="pointer-events-none absolute inset-0 opacity-25">
+    <section className="dashboard-hero relative isolate min-h-[350px] overflow-hidden rounded-[24px] bg-[#667493] p-6 text-white shadow-[0_16px_36px_rgba(56,50,63,0.12)] sm:p-7 lg:min-h-[390px] lg:p-8">
+      <div className="dashboard-hero__decorative pointer-events-none absolute inset-0 opacity-25">
         <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border-[44px] border-white/20" />
         <div className="absolute bottom-8 right-[32%] h-36 w-36 rotate-12 rounded-[42px] bg-white/10" />
         <div className="absolute left-[48%] top-10 h-2 w-2 rounded-full bg-white/70 shadow-[24px_0_0_rgba(255,255,255,.7),48px_0_0_rgba(255,255,255,.7),72px_0_0_rgba(255,255,255,.7),0_24px_0_rgba(255,255,255,.7),24px_24px_0_rgba(255,255,255,.7),48px_24px_0_rgba(255,255,255,.7),72px_24px_0_rgba(255,255,255,.7)]" />
